@@ -17,7 +17,7 @@ package net.hedtech.restfulapi.extractors.json
 
 import net.hedtech.restfulapi.extractors.*
 
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 class DeclarativeJSONExtractor extends BasicJSONExtractor {
 

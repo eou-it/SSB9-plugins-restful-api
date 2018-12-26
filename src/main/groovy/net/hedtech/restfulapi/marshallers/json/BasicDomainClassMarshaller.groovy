@@ -16,28 +16,28 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
+import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 
-import net.hedtech.restfulapi.Inflector
+
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler as DCAH
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.proxy.EntityProxyHandler
-import org.codehaus.groovy.grails.web.util.WebUtils
-import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler
+import org.grails.core.artefact.DomainClassArtefactHandler as DCAH
+import grails.core.GrailsApplication
+import grails.util.GrailsClassUtils
+import grails.core.GrailsDomainClass
+import grails.core.GrailsDomainClassProperty
+import org.grails.web.util.WebUtils
+import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.EntityProxyHandler
 import org.codehaus.groovy.grails.web.converters.marshaller.json.*
-import org.codehaus.groovy.grails.web.json.JSONWriter
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.converters.ConverterUtil
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.web.json.JSONWriter
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.ConverterUtil
+import org.grails.web.converters.marshaller.ObjectMarshaller
 
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl

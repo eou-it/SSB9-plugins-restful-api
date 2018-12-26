@@ -21,10 +21,10 @@ import grails.util.GrailsNameUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.web.converters.marshaller.xml.*
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import grails.util.GrailsClassUtils
+import grails.core.GrailsDomainClass
+import grails.core.GrailsDomainClassProperty
+import org.grails.web.converters.exceptions.ConverterException
 
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl

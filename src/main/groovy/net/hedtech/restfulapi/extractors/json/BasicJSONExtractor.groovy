@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat
 
 import net.hedtech.restfulapi.extractors.*
 import org.codehaus.groovy.grails.web.json.*
+import org.grails.web.json.JSONObject
 
 class BasicJSONExtractor implements JSONExtractor {
 

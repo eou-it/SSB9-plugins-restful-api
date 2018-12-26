@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat
 import net.hedtech.restfulapi.extractors.DateParseException
 import net.hedtech.restfulapi.extractors.ShortObjectExtractionException
 
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 import spock.lang.*
 

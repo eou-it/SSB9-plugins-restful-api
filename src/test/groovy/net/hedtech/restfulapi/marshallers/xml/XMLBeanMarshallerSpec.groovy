@@ -24,10 +24,10 @@ import grails.test.mixin.web.*
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.beans.*
 
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
+import grails.core.GrailsDomainClassProperty
 import org.codehaus.groovy.grails.support.MockApplicationContext
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Field

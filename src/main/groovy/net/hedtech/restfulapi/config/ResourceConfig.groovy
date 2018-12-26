@@ -15,7 +15,7 @@
  *****************************************************************************/
 package net.hedtech.restfulapi.config
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import net.hedtech.restfulapi.Methods
 
 class ResourceConfig {

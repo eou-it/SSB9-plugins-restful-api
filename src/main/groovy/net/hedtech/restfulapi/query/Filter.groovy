@@ -18,14 +18,12 @@ package net.hedtech.restfulapi.query
 
 import grails.gorm.DetachedCriteria
 
-import net.hedtech.restfulapi.Inflector
-
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
+import grails.core.GrailsApplication
+import grails.core.GrailsDomainClass
+import grails.core.GrailsDomainClassProperty
 
 
 /**
@@ -139,11 +137,11 @@ class Filter {
         filters
     }
 
-
+/*
     public static String getDomainClassName(pluralizedResourceName, boolean capitalizeFirstLetter = true) {
         def singularizedName = Inflector.singularize(pluralizedResourceName)
         Inflector.camelCase(singularizedName, capitalizeFirstLetter)
-    }
+    }*/
 
 
     public static GrailsDomainClass getGrailsDomainClass(application, pluralizedResourceName) {

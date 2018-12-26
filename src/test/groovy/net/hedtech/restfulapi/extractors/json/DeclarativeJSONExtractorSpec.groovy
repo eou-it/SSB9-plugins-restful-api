@@ -21,7 +21,7 @@ import grails.test.mixin.support.*
 
 import java.text.SimpleDateFormat
 
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 import spock.lang.*
 

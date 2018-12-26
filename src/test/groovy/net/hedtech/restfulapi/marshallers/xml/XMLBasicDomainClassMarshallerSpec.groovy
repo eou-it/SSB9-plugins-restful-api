@@ -25,7 +25,7 @@ import net.hedtech.restfulapi.*
 
 import org.apache.commons.lang.UnhandledException
 
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
+import grails.core.GrailsDomainClassProperty
 import org.codehaus.groovy.grails.support.MockApplicationContext
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
 

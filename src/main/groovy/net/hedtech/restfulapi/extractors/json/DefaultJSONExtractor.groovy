@@ -17,7 +17,7 @@ package net.hedtech.restfulapi.extractors.json
 
 import net.hedtech.restfulapi.extractors.JSONExtractor
 
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 /**
  * Default extractor for JSON content.

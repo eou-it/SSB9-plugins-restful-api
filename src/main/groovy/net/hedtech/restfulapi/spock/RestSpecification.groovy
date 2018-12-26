@@ -19,7 +19,7 @@ package net.hedtech.restfulapi.spock
 import grails.test.mixin.*
 import spock.lang.*
 
-import org.codehaus.groovy.runtime.InvokerHelper
+//import org.codehaus.groovy.runtime.InvokerHelper
 
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -34,7 +34,7 @@ import org.springframework.web.client.RestTemplate
   Based on the functional-test plugin by Marc Palmer.
   See <a href="http://grails.org/plugin/functional-test"/>
 */
-abstract class RestSpecification extends Specification {
+abstract class RestSpecification{
 
     def response
 

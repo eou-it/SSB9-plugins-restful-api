@@ -17,11 +17,10 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-
+import grails.core.support.proxy.ProxyHandler
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import net.hedtech.restfulapi.Inflector
 
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
@@ -32,13 +31,13 @@ import java.lang.reflect.Modifier
 
 import grails.util.GrailsNameUtils
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
-import org.codehaus.groovy.grails.orm.hibernate.proxy.HibernateProxyHandler
-import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler
-import org.codehaus.groovy.grails.web.json.JSONWriter
+import grails.core.GrailsApplication
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.orm.hibernate.proxy.HibernateProxyHandler
+import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.EntityProxyHandler
+import org.grails.web.json.JSONWriter
 import org.springframework.beans.BeanUtils
 
 import org.springframework.beans.BeanWrapper

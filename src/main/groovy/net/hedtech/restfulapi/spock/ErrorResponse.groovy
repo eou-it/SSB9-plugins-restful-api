@@ -20,7 +20,7 @@ import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
 
-import org.codehaus.groovy.grails.web.json.JSONElement
+import org.grails.web.json.JSONElement
 import org.springframework.web.client.HttpStatusCodeException
 
 class ErrorResponse {

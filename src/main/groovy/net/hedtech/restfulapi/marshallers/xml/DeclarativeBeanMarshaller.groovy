@@ -26,7 +26,6 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler
 
 import org.springframework.beans.BeanWrapper
 

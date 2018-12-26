@@ -28,9 +28,9 @@ import net.hedtech.restfulapi.extractors.json.*
 import net.hedtech.restfulapi.extractors.xml.*
 import net.hedtech.restfulapi.marshallers.*
 
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.web.json.JSONObject
 
 import spock.lang.*
 

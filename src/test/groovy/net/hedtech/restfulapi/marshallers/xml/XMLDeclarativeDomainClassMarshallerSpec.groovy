@@ -23,7 +23,7 @@ import grails.test.mixin.web.*
 
 import net.hedtech.restfulapi.*
 
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
+import grails.core.GrailsDomainClassProperty
 import org.codehaus.groovy.grails.support.MockApplicationContext
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
 

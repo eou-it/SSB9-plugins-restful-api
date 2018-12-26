@@ -15,7 +15,7 @@
  *****************************************************************************/
 package net.hedtech.restfulapi.marshallers
 
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.exceptions.ConverterException
 
 class MissingFieldsException extends ConverterException {
     List<String> missingNames

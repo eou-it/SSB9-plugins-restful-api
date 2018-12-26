@@ -16,6 +16,7 @@
 package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
+import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 
 import java.beans.PropertyDescriptor
@@ -23,20 +24,19 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-import net.hedtech.restfulapi.Inflector
+
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
-import org.codehaus.groovy.grails.support.proxy.EntityProxyHandler
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
-import org.codehaus.groovy.grails.orm.hibernate.proxy.HibernateProxyHandler
-import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler
+import grails.core.GrailsApplication
+import org.grails.web.converters.marshaller.NameAwareMarshaller
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.orm.hibernate.proxy.HibernateProxyHandler
+import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.EntityProxyHandler
 
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.BeanWrapper
