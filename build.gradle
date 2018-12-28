@@ -50,10 +50,15 @@ dependencies {
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails:grails-web-testing-support"
+    testCompile "org.grails.plugins:geb"
     compile 'org.grails.plugins:spring-security-core:3.1.1'
     compile "org.grails.plugins:hibernate5"
     compile "org.hibernate:hibernate-core:5.1.5.Final"
     compile "org.hibernate:hibernate-ehcache:5.1.5.Final"
+    compile 'org.grails.plugins:cache-headers:2.0.2'
+    testCompile "org.grails:grails-test-mixins:3.3.0"
+    testCompile "org.grails:grails-gorm-testing-support:1.1.5"
+    testCompile "org.grails:grails-web-testing-support:1.1.5"
 
 }
 

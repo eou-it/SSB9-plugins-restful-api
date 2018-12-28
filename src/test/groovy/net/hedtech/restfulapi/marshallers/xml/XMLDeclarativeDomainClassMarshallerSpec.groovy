@@ -17,15 +17,18 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.test.mixin.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
+
+/*import grails.test.mixin.domain.DomainClassUnitTestMixin
 import grails.test.mixin.support.*
-import grails.test.mixin.web.*
+import grails.test.mixin.web.**/
 
 import net.hedtech.restfulapi.*
 
 import grails.core.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.MockApplicationContext
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+//import org.codehaus.groovy.grails.support.MockApplicationContext
+//import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -33,14 +36,13 @@ import org.junit.rules.TestName
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.web.context.WebApplicationContext
+import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.mixin.domain.DomainClassUnitTestMixin
 
 import spock.lang.*
 
 
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
-@Mock([MarshalledThing,MarshalledPartOfThing,
-       MarshalledSubPartOfThing,MarshalledThingContributor,
-       MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])
 class XMLDeclarativeDomainClassMarshallerSpec extends Specification {
 
     @Rule TestName testName = new TestName()

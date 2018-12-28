@@ -17,16 +17,18 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.test.mixin.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
+import grails.testing.gorm.DomainUnitTest
+
+/*import grails.test.mixin.domain.DomainClassUnitTestMixin
 import grails.test.mixin.support.*
-import grails.test.mixin.web.*
+import grails.test.mixin.web.**/
 
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.extractors.xml.*
 
 import grails.core.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.MockApplicationContext
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+//import org.grails.support.MockApplicationContext
+import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -41,11 +43,13 @@ import spock.lang.*
  * Sanity check that the MapExtractor can parse content generated
  * by the declarative marshaller.
  */
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
+/*@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
 @Mock([MarshalledThing,MarshalledPartOfThing,
        MarshalledSubPartOfThing,MarshalledThingContributor,
-       MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])
-class XMLDomainRoundTripSpec extends Specification {
+       MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])*/
+class XMLDomainRoundTripSpec extends Specification implements DomainUnitTest<MarshalledThing,MarshalledPartOfThing,
+        MarshalledSubPartOfThing,MarshalledThingContributor,
+        MarshalledOwnerOfThing,MarshalledThingEmbeddedPart> {
 
     @Rule TestName testName = new TestName()
 

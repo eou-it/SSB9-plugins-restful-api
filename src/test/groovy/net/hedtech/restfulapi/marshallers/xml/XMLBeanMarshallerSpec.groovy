@@ -17,16 +17,16 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.test.mixin.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
+/*import grails.test.mixin.domain.DomainClassUnitTestMixin
 import grails.test.mixin.support.*
-import grails.test.mixin.web.*
+import grails.test.mixin.web.**/
 
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.beans.*
 
 import grails.core.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.MockApplicationContext
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+//import org.codehaus.groovy.grails.support.MockApplicationContext
+//import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 import org.grails.web.json.JSONObject
 
 import java.beans.PropertyDescriptor
