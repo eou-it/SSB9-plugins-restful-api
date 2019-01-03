@@ -15,7 +15,7 @@
  *****************************************************************************/
 package net.hedtech.restfulapi
 
-import com.grailsrocks.cacheheaders.CacheHeadersService
+import grails.plugins.cacheheaders.CacheHeadersService
 
 import grails.converters.JSON
 import grails.converters.XML
@@ -27,15 +27,16 @@ import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.json.*
 import net.hedtech.restfulapi.extractors.xml.*
 import net.hedtech.restfulapi.marshallers.*
+import net.hedtech.restfulapi.RestfulApiController
+import spock.lang.Specification
 
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.web.json.JSONObject
+import spock.lang.Unroll
 
-import spock.lang.*
 
 
-@TestFor(RestfulApiController)
 class RestfulApiControllerSpec extends Specification {
 
     def setup() {

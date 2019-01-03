@@ -17,6 +17,7 @@
 package net.hedtech.restfulapi.extractors.xml
 
 import grails.test.mixin.*
+import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.*
 import grails.converters.XML
 import grails.test.mixin.support.*
@@ -25,8 +26,7 @@ import grails.test.mixin.web.*
 import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.xml.*
 
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin])
-class MapExtractorSpec extends Specification {
+class MapExtractorSpec extends Specification implements ControllerUnitTest<MapExtractor>{
 
     def "Test basic extraction"() {
         setup:

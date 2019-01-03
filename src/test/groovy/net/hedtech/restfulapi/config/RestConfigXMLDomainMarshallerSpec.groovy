@@ -18,7 +18,7 @@ package net.hedtech.restfulapi.config
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.xml.*
@@ -27,8 +27,7 @@ import net.hedtech.restfulapi.marshallers.xml.*
 import spock.lang.*
 
 
-@TestMixin(GrailsUnitTestMixin)
-class RestConfigXMLDomainMarshallerSpec extends Specification {
+class RestConfigXMLDomainMarshallerSpec extends Specification implements ControllerUnitTest<RestConfig> {
 
     def "Test xml domain marshaller in marshaller group"() {
         setup:

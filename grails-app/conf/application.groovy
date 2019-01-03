@@ -21,3 +21,31 @@ log4j = {
           'org.hibernate',
           'net.sf.ehcache.hibernate'
 }
+restfulApiConfig = {
+    // Resources for web_app_extensibility plugin
+        resource 'extensions' config {
+      //  def a = new BasicDomainClassMarshaller()
+       // println a
+    }
+}
+/*dataSource {
+    //configClass = GrailsAnnotationConfiguration.class
+    dialect = "org.hibernate.dialect.Oracle10gDialect"
+    //loggingSql = false
+}*/
+
+
+hibernate {
+    cache.use_second_level_cache = true
+    cache.use_query_cache = true
+    cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory'
+    //hbm2ddl.auto = null
+    show_sql = false
+    packagesToScan="net.hedtech.**.*"
+    flush.mode = AUTO
+    dialect = "org.hibernate.dialect.Oracle10gDialect"
+   /* config.location = [
+            "classpath:hibernate-banner-core.cfg.xml",
+            "classpath:hibernate-banner-core.testing.cfg.xml"
+    ]*/
+}
