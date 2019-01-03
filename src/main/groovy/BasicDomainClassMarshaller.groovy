@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
-
 
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
@@ -33,7 +31,7 @@ import grails.core.GrailsDomainClassProperty
 import org.grails.web.util.WebUtils
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.EntityProxyHandler
-import org.codehaus.groovy.grails.web.converters.marshaller.json.*
+import grails.web.converters.marshaller.json.*
 import org.grails.web.json.JSONWriter
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.ConverterUtil
