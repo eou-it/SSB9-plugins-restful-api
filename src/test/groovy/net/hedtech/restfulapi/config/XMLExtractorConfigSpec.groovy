@@ -18,7 +18,7 @@ package net.hedtech.restfulapi.config
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.xml.*
@@ -27,8 +27,7 @@ import net.hedtech.restfulapi.marshallers.xml.*
 import spock.lang.*
 
 
-@TestMixin(GrailsUnitTestMixin)
-class XMLExtractorConfigSpec extends Specification {
+class XMLExtractorConfigSpec extends Specification implements ControllerUnitTest<XMLExtractorConfig> {
 
     def "Test inherits"() {
         setup:
@@ -95,7 +94,7 @@ class XMLExtractorConfigSpec extends Specification {
         ['person.name'] == config.dottedFlattenedPaths
     }
 
-    def "Test short object explicit true"() {
+    def "Test float object explicit true"() {
         setup:
         def src = {
             property 'person.name' flatObject true

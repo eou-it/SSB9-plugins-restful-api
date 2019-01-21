@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 
+import net.hedtech.restfulapi.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import org.apache.commons.logging.Log
@@ -28,9 +29,9 @@ import grails.core.GrailsApplication
 import grails.util.GrailsClassUtils
 import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
-import org.grails.web.util.WebUtils
-import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.EntityProxyHandler
+import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.ProxyHandler
 import org.grails.web.converters.marshaller.json.*
 import org.grails.web.json.JSONWriter
 import org.grails.web.converters.exceptions.ConverterException
@@ -50,10 +51,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
  * The class can be extended to override how an object is marshalled.
  **/
 class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
-
-    protected static final Log log =
-        LogFactory.getLog(BasicDomainClassMarshaller.class)
-
     GrailsApplication app
     //allow proxy handler to be explicitly set
     //this field should never be used directly,

@@ -17,6 +17,7 @@ package net.hedtech.restfulapi.extractors.xml
 
 import grails.test.mixin.*
 import grails.test.mixin.web.*
+import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.*
 import grails.test.mixin.support.*
 import grails.converters.XML
@@ -27,8 +28,7 @@ import net.hedtech.restfulapi.extractors.DateParseException
 import net.hedtech.restfulapi.extractors.ShortObjectExtractionException
 
 
-@TestMixin([GrailsUnitTestMixin])
-class BasicXMLExtractorSpec extends Specification {
+class BasicXMLExtractorSpec extends Specification implements ControllerUnitTest<BasicXMLExtractor>{
 
     def "Test rename paths"() {
         setup:

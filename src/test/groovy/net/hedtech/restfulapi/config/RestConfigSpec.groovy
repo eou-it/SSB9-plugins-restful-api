@@ -18,7 +18,7 @@ package net.hedtech.restfulapi.config
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.json.*
@@ -27,8 +27,7 @@ import net.hedtech.restfulapi.marshallers.json.*
 import spock.lang.*
 
 
-@TestMixin(GrailsUnitTestMixin)
-class RestConfigSpec extends Specification {
+class RestConfigSpec extends Specification implements ControllerUnitTest<RestConfig> {
 
     def "Test simple configuration for one media type"() {
         setup:

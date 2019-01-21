@@ -18,7 +18,7 @@ package net.hedtech.restfulapi.config
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.extractors.configuration.*
 import net.hedtech.restfulapi.extractors.json.*
 import net.hedtech.restfulapi.*
@@ -26,9 +26,7 @@ import net.hedtech.restfulapi.marshallers.json.*
 
 import spock.lang.*
 
-
-@TestMixin(GrailsUnitTestMixin)
-class JSONDomainMarshallerConfigSpec extends Specification {
+class JSONDomainMarshallerConfigSpec extends Specification implements ControllerUnitTest<JSONDomainMarshallerConfig> {
 
     def "Test inherits"() {
         setup:
