@@ -18,6 +18,8 @@ package net.hedtech.restfulapi.query
 
 import grails.gorm.DetachedCriteria
 
+import net.hedtech.restfulapi.Inflector
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -43,8 +45,8 @@ class Filter {
     private static final Range ALIASES      = 'a'..'p'
     private static List FILTER_TERMS        = ['field', 'operator', 'value']
     private static List STRING_OPERATORS    = ['eq', 'equals', 'contains']
-    private static List NUMERIC_OPERATORS   = ['eq', 'equals', 'lt', 'gt']
-    private static List DATE_OPERATORS      = ['eq', 'equals', 'lt', 'gt']
+    private static List NUMERIC_OPERATORS   = ['eq', 'equals', 'lt', 'gt', 'le', 'ge']
+    private static List DATE_OPERATORS      = ['eq', 'equals', 'lt', 'gt', 'le', 'ge']
     private static List SUPPORTED_OPERATORS = STRING_OPERATORS + NUMERIC_OPERATORS + DATE_OPERATORS
 
     private static List NUMERIC_TYPES       = ['num', 'number']
@@ -137,11 +139,11 @@ class Filter {
         filters
     }
 
-/*
+
     public static String getDomainClassName(pluralizedResourceName, boolean capitalizeFirstLetter = true) {
         def singularizedName = Inflector.singularize(pluralizedResourceName)
         Inflector.camelCase(singularizedName, capitalizeFirstLetter)
-    }*/
+    }
 
 
     public static GrailsDomainClass getGrailsDomainClass(application, pluralizedResourceName) {

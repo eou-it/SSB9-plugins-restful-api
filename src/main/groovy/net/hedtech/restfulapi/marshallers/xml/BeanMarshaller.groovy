@@ -25,7 +25,10 @@ import java.beans.PropertyDescriptor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import org.codehaus.groovy.grails.web.xml.*
+
+import grails.util.GrailsClassUtils
+import grails.core.support.proxy.ProxyHandler
+import org.grails.web.xml.*
 
 import org.springframework.beans.BeanWrapper
 
@@ -45,7 +48,9 @@ class BeanMarshaller extends AbstractBeanMarshaller {
 
     @Override
     public boolean supports(Object object) {
-        !(object instanceof Collection) && !(object instanceof Map)
+        !(object instanceof Collection) &&
+        !(object instanceof Map) &&
+        !GrailsClassUtils.isJdk5Enum(object.getClass())
     }
 
     @Override

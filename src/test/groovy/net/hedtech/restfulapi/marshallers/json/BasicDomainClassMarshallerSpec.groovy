@@ -17,17 +17,17 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.test.mixin.*
-import grails.test.mixin.support.*
+/*import grails.test.mixin.support.*
 import grails.test.mixin.web.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
-
+import grails.test.mixin.domain.DomainClassUnitTestMixin*/
+import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.*
 
 import org.apache.commons.lang.UnhandledException
 
 import grails.core.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.MockApplicationContext
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+//import org.codehaus.groovy.grails.support.MockApplicationContext
+import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONObject
 
@@ -40,11 +40,10 @@ import org.springframework.web.context.WebApplicationContext
 import spock.lang.*
 
 
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
 @Mock([MarshalledThing,MarshalledPartOfThing,
        MarshalledSubPartOfThing,MarshalledThingContributor,
        MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])
-class BasicDomainClassMarshallerSpec extends Specification {
+class BasicDomainClassMarshallerSpec extends Specification implements ControllerUnitTest<BasicDomainClassMarshaller> {
 
     @Rule TestName testName = new TestName()
 
@@ -764,13 +763,13 @@ class BasicDomainClassMarshallerSpec extends Specification {
         register( "default", marshaller )
     }
 
-    private String render( String name, def obj ) {
+     String render( String name, def obj ) {
         JSON.use( "BasicDomainClassMarshaller:" + testName + ":$name" ) {
             return (obj as JSON) as String
         }
     }
 
-    private String render( def obj ) {
+     String render( def obj ) {
         render( "default", obj )
     }
 }

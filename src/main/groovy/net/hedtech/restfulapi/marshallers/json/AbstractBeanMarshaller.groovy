@@ -17,10 +17,11 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import grails.core.support.proxy.ProxyHandler
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import net.hedtech.restfulapi.Inflector
 
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
@@ -34,9 +35,8 @@ import grails.util.GrailsNameUtils
 import grails.core.GrailsApplication
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.ObjectMarshaller
-import org.grails.orm.hibernate.proxy.HibernateProxyHandler
 import grails.core.support.proxy.DefaultProxyHandler
-import grails.core.support.proxy.EntityProxyHandler
+import grails.core.support.proxy.ProxyHandler
 import org.grails.web.json.JSONWriter
 import org.springframework.beans.BeanUtils
 
@@ -249,8 +249,8 @@ class AbstractBeanMarshaller implements ObjectMarshaller<JSON> {
      *
      **/
     protected boolean processProperty(BeanWrapper beanWrapper,
-                                   PropertyDescriptor property,
-                                   JSON json) {
+                                      PropertyDescriptor property,
+                                      JSON json) {
         true
     }
 

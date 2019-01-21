@@ -16,25 +16,25 @@
 package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
-import grails.core.support.proxy.EntityProxyHandler
-import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 
-
+import net.hedtech.restfulapi.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.marshaller.NameAwareMarshaller
-import org.grails.core.artefact.DomainClassArtefactHandler as DCAH
+import org.grails.core.artefact.DomainClassArtefactHandler
 import grails.core.GrailsApplication
 import grails.util.GrailsClassUtils
 import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
+import grails.core.support.proxy.EntityProxyHandler
 import org.grails.web.util.WebUtils
 import grails.core.support.proxy.DefaultProxyHandler
-import org.codehaus.groovy.grails.web.converters.marshaller.xml.*
-import javax.xml.stream.XMLStreamWriter
+import grails.core.support.proxy.ProxyHandler
+import org.grails.web.converters.marshaller.xml.*
+import org.grails.web.xml.XMLStreamWriter
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.ConverterUtil
 import org.grails.web.converters.marshaller.ObjectMarshaller
@@ -157,7 +157,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
 
     @Override
     public boolean supports(Object object) {
-        DCAH.isDomainClass(object.getClass())
+        DomainClassArtefactHandler.isDomainClass(object.getClass())
     }
 
     /**

@@ -17,9 +17,10 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.test.mixin.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
+/*import grails.test.mixin.domain.DomainClassUnitTestMixin
 import grails.test.mixin.support.*
-import grails.test.mixin.web.*
+import grails.test.mixin.web.**/
+import grails.testing.web.controllers.ControllerUnitTest
 
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Field
@@ -31,8 +32,8 @@ import net.hedtech.restfulapi.beans.*
 import org.apache.commons.lang.UnhandledException
 
 import grails.core.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.MockApplicationContext
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+/*import org.codehaus.groovy.grails.support.MockApplicationContext*/
+import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 import org.grails.web.json.JSONObject
 
 import org.springframework.beans.BeanWrapper
@@ -43,9 +44,7 @@ import org.junit.rules.TestName
 
 import spock.lang.*
 
-
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin])
-class BeanMarshallerSpec extends Specification {
+class BeanMarshallerSpec extends Specification implements ControllerUnitTest<BeanMarshaller>{
 
     @Rule TestName testName = new TestName()
 
@@ -418,7 +417,7 @@ class BeanMarshallerSpec extends Specification {
         register( "default", marshaller )
     }
 
-    private String render( String name, def obj ) {
+    String render( String name, def obj ) {
         JSON.use( "BeanMarshallerSpec:" + testName.getMethodName() + ":$name" ) {
             //for some reason (obj as JSON) doesn't work in parameterized spock tests
             def converter = new JSON(obj)
@@ -426,7 +425,7 @@ class BeanMarshallerSpec extends Specification {
         }
     }
 
-    private String render( def obj ) {
+    String render( def obj ) {
         render( "default", obj )
     }
 

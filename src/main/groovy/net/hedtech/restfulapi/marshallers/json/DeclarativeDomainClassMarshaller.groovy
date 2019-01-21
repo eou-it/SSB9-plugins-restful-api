@@ -18,7 +18,7 @@ package net.hedtech.restfulapi.marshallers.json
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 
-
+import net.hedtech.restfulapi.Inflector
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -30,8 +30,9 @@ import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
 import grails.core.support.proxy.EntityProxyHandler
 import org.grails.web.util.WebUtils
-import org.grails.orm.hibernate.proxy.HibernateProxyHandler
-import org.codehaus.groovy.grails.web.converters.marshaller.json.*
+import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.ProxyHandler
+import org.grails.web.converters.marshaller.json.*
 import org.grails.web.json.JSONWriter
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.ConverterUtil
@@ -52,6 +53,14 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
     def excludedFields = []
     def includeId = true
     def includeVersion = true
+    //If a field is a key in the map, then represents
+    //a field-level override for whether to marshall that
+    //field if null.  Otherise, marshallNullFields is used
+    //to determine whether to marshall a field if null
+    def marshalledNullFields = [:]
+    //default behavior on whether to marshall null fields.
+    def marshallNullFields = true
+
     def additionalFieldClosures = []
     def additionalFieldsMap = [:]
     def fieldResourceNames = [:]
@@ -164,7 +173,19 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
     protected boolean processField(BeanWrapper beanWrapper,
                                    GrailsDomainClassProperty property,
                                    JSON json) {
-        true
+        boolean ignoreNull = false
+        if (marshalledNullFields.containsKey(property.getName())) {
+            ignoreNull = !marshalledNullFields[property.getName()]
+        } else {
+            ignoreNull = !marshallNullFields
+        }
+
+        if (ignoreNull) {
+            Object val = beanWrapper.getPropertyValue(property.getName())
+            return val != null
+        } else {
+            return true
+        }
     }
 
     @Override

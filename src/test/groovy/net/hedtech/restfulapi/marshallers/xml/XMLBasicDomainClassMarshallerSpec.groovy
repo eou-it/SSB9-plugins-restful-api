@@ -17,7 +17,13 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.test.mixin.*
+<<<<<<< Updated upstream
 import grails.test.mixin.domain.DomainClassUnitTestMixin
+=======
+import grails.testing.gorm.DomainUnitTest
+
+/*import grails.test.mixin.domain.DomainClassUnitTestMixin
+>>>>>>> Stashed changes
 import grails.test.mixin.support.*
 import grails.test.mixin.web.*
 
@@ -38,11 +44,11 @@ import org.springframework.web.context.WebApplicationContext
 import spock.lang.*
 
 
-@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
+/*@TestMixin([GrailsUnitTestMixin, ControllerUnitTestMixin,DomainClassUnitTestMixin])
 @Mock([MarshalledThing,MarshalledPartOfThing,
        MarshalledSubPartOfThing,MarshalledThingContributor,
-       MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])
-class XMLBasicDomainClassMarshallerSpec extends Specification {
+       MarshalledOwnerOfThing,MarshalledThingEmbeddedPart])*/
+class XMLBasicDomainClassMarshallerSpec extends Specification implements DomainUnitTest{
 
     @Rule TestName testName = new TestName()
 
