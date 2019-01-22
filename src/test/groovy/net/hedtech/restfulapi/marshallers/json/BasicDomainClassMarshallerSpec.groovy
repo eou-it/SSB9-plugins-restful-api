@@ -22,7 +22,7 @@ import grails.test.mixin.web.*
 import grails.test.mixin.domain.DomainClassUnitTestMixin*/
 import grails.testing.web.controllers.ControllerUnitTest
 import net.hedtech.restfulapi.*
-
+import net.hedtech.restfulapi.marshallers.json.BasicDomainClassMarshaller
 import org.apache.commons.lang.UnhandledException
 
 import grails.core.GrailsDomainClassProperty

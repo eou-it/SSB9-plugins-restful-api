@@ -16,21 +16,21 @@
 
 package net.hedtech.restfulapi.query
 
-import grails.plugin.spock.IntegrationSpec
 
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 
 import net.hedtech.restfulapi.*
 
 import grails.core.GrailsApplication
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+
 
 import java.text.*
 
 import spock.lang.*
 
-
-class HQLBuilderSpec extends IntegrationSpec {
+@Integration
+class HQLBuilderSpec{
 
     def grailsApplication
     def dataSource

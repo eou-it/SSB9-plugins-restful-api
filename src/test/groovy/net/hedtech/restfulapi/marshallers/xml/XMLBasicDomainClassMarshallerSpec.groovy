@@ -16,11 +16,18 @@
 package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
-import grails.test.mixin.*
-<<<<<<< Updated upstream
-import grails.test.mixin.domain.DomainClassUnitTestMixin
-=======
+import grails.core.GrailsDomainClassProperty
 import grails.testing.gorm.DomainUnitTest
+import net.hedtech.restfulapi.MarshalledOwnerOfThing
+import net.hedtech.restfulapi.MarshalledPartOfThing
+import net.hedtech.restfulapi.MarshalledSubPartOfThing
+import net.hedtech.restfulapi.MarshalledThing
+import net.hedtech.restfulapi.MarshalledThingContributor
+import net.hedtech.restfulapi.MarshalledThingEmbeddedPart
+import org.junit.Rule
+import org.junit.rules.TestName
+import org.springframework.beans.BeanWrapper
+import spock.lang.Specification
 
 /*import grails.test.mixin.domain.DomainClassUnitTestMixin
 >>>>>>> Stashed changes
@@ -813,7 +820,7 @@ class XMLBasicDomainClassMarshallerSpec extends Specification implements DomainU
         def marshaller = new BasicDomainClassMarshaller(
             app:grailsApplication
         )
-        marshaller.metaClass.deepMarshallAssociation << {BeanWrapper wrapper, GrailsDomainClassProperty property -> true}
+        marshaller.metaClass.deepMarshallAssociation << { BeanWrapper wrapper, GrailsDomainClassProperty property -> true}
         register( marshaller )
         MarshalledThing thing = new MarshalledThing( code:'AA', description:"aa thing" )
         def parts = []

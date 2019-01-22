@@ -15,27 +15,22 @@
  *****************************************************************************/
 package net.hedtech.restfulapi
 
-import grails.plugins.cacheheaders.CacheHeadersService
-
 import grails.converters.JSON
 import grails.converters.XML
-import grails.test.mixin.*
-
-import net.hedtech.restfulapi.config.*
-import net.hedtech.restfulapi.extractors.*
-import net.hedtech.restfulapi.extractors.configuration.*
-import net.hedtech.restfulapi.extractors.json.*
-import net.hedtech.restfulapi.extractors.xml.*
-import net.hedtech.restfulapi.marshallers.*
-import net.hedtech.restfulapi.RestfulApiController
-import spock.lang.Specification
-
+//import grails.plugins.cacheheaders.CacheHeadersService
+import net.hedtech.restfulapi.config.RepresentationConfig
+import net.hedtech.restfulapi.extractors.JSONExtractor
+import net.hedtech.restfulapi.extractors.RequestExtractor
+import net.hedtech.restfulapi.extractors.XMLExtractor
+import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHolder
+import net.hedtech.restfulapi.extractors.json.DefaultJSONExtractor
+import net.hedtech.restfulapi.marshallers.MarshallingService
+import net.hedtech.restfulapi.marshallers.StreamWrapper
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.web.json.JSONObject
+import spock.lang.Specification
 import spock.lang.Unroll
-
-
 
 class RestfulApiControllerSpec extends Specification {
 
@@ -270,12 +265,13 @@ class RestfulApiControllerSpec extends Specification {
 
         // Since both our show and list methods use a closure from the cache-headers
         // plugin, we need to mock that closure
-        def cacheHeadersService = new CacheHeadersService()
+        //TODO CacheHeadersService is unavailable in Grails 3 so commented this piece of snippet
+       /* def cacheHeadersService = new CacheHeadersService()
         Closure withCacheHeadersClosure = { Closure c ->
             c.delegate = controller
             c.resolveStrategy = Closure.DELEGATE_ONLY
             cacheHeadersService.withCacheHeaders( c.delegate, c )
-        }
+        }*/
         controller.metaClass.withCacheHeaders = withCacheHeadersClosure
 
         request.addHeader('Accept','application/json')
@@ -1746,12 +1742,13 @@ class RestfulApiControllerSpec extends Specification {
 
 
     private void mockCacheHeaders() {
-        def cacheHeadersService = new CacheHeadersService()
+        //TODO CacheHeadersService is unavailable in Grails 3 so commented this piece of snippet
+       /* def cacheHeadersService = new CacheHeadersService()
         Closure withCacheHeadersClosure = { Closure c ->
             c.delegate = controller
             c.resolveStrategy = Closure.DELEGATE_ONLY
             cacheHeadersService.withCacheHeaders( c.delegate, c )
-        }
+        }*/
         controller.metaClass.withCacheHeaders = withCacheHeadersClosure
     }
 

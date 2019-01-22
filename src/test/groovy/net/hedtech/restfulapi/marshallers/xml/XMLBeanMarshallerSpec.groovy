@@ -17,9 +17,11 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.test.mixin.*
-/*import grails.test.mixin.domain.DomainClassUnitTestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+
+import grails.test.mixin.domain.DomainClassUnitTestMixin
 import grails.test.mixin.support.*
-import grails.test.mixin.web.**/
+import grails.test.mixin.web.*
 
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.beans.*
