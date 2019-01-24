@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
+ * Copyright 2018 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+package net.hedtech.restfulapi.config
 
-package net.hedtech.restfulapi
+/**
+ * Exception thrown when the representationMetadata defined for
+ * a representation of a resource is not a map.
+ **/
+class RepresentationMetadataNotMapException extends RuntimeException {
+    String resourceName
+    String mediaType
 
-class ResponseHolder {
-    Object data
-    def headers = [:]
-    def message
-    def isQapi = false
-
-    void addHeader( String name, Object value ) {
-        if (!headers[name]) {
-            headers[name] = []
-        }
-        headers[name].add value?.toString()
+    String getMessage() {
+        "Resource $resourceName with representation $mediaType representationMetadata does not define a map"
     }
 }

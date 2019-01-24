@@ -32,6 +32,7 @@ import grails.core.support.proxy.EntityProxyHandler
 import org.grails.web.util.WebUtils
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.ProxyHandler
+import grails.core.support.proxy.ProxyHandler
 import org.grails.web.converters.marshaller.json.*
 import org.grails.web.json.JSONWriter
 import org.grails.web.converters.exceptions.ConverterException
@@ -60,6 +61,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
     def marshalledNullFields = [:]
     //default behavior on whether to marshall null fields.
     def marshallNullFields = true
+    def marshallEmptyCollections = true
 
     def additionalFieldClosures = []
     def additionalFieldsMap = [:]
@@ -182,6 +184,9 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
 
         if (ignoreNull) {
             Object val = beanWrapper.getPropertyValue(property.getName())
+            if (!marshallEmptyCollections && val instanceof Collection && val.size() == 0) {
+                return false
+            }
             return val != null
         } else {
             return true

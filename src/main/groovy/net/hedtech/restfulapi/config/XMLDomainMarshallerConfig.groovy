@@ -15,6 +15,7 @@
  *****************************************************************************/
 package net.hedtech.restfulapi.config
 
+import grails.core.GrailsApplication
 
 class XMLDomainMarshallerConfig implements MergeableConfig {
 

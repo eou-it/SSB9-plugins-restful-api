@@ -21,7 +21,7 @@ import grails.converters.XML
 import grails.web.JSONBuilder
 import groovy.xml.StreamingMarkupBuilder
 
-/*import org.grails.plugins.codecs.Base64Codec*/
+/*import org.grails.plugins.codecs.Base64Code*/
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.UrlResource
@@ -48,7 +48,7 @@ class RequestCustomizer {
 
     // configures basic author
     RequestCustomizer auth(String username, String password) {
-        String encoded = Base64Coder.encode("$username:$password")
+        String encoded = Base64Codec.encode("$username:$password")
         headers.Authorization = "Basic $encoded".toString()
         return this
     }

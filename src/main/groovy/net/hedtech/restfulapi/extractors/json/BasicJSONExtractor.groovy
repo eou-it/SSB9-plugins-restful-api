@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,23 @@ class BasicJSONExtractor implements JSONExtractor {
 
     Map extract(JSONObject content) {
         Map map = unwrap(content)
+        if (map) {
+            def contentFilterHolder = ContentFilterHolder.get()
+            if (contentFilterHolder) {
+                def contentFilter = contentFilterHolder.contentFilter
+                def result = contentFilter.applyFilter(
+                        contentFilterHolder.resourceName,
+                        map,
+                        contentFilterHolder.contentType)
+                if (result.isPartial) {
+                    if (contentFilter.allowPartialRequest) {
+                        map = result.content
+                    } else {
+                        throw new ProtectedFieldException(contentFilterHolder.resourceName)
+                    }
+                }
+            }
+        }
         getTransformer().transform(map)
     }
 

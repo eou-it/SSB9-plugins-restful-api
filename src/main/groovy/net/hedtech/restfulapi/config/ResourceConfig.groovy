@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ class ResourceConfig {
     String serviceName
     String serviceAdapterName
     def methods = [ 'list', 'show', 'create', 'update', 'delete' ]
+    def unsupportedMediaTypeMethods = [:]
+    def resourceMetadata = [:]
     //use a LinkedHashMap because we want to preserve
     //the order in which representations are added
     def representations = new LinkedHashMap()
@@ -53,6 +55,16 @@ class ResourceConfig {
         return this
     }
 
+    ResourceConfig setUnsupportedMediaTypeMethods( def unsupportedMediaTypeMethods ) {
+        this.unsupportedMediaTypeMethods = unsupportedMediaTypeMethods
+        return this
+    }
+
+    ResourceConfig setResourceMetadata( def resourceMetadata ) {
+        this.resourceMetadata = resourceMetadata
+        return this
+    }
+
     ResourceConfig setIdMatchEnforced(boolean b) {
         this.idMatchEnforced = b
         return this
@@ -71,6 +83,18 @@ class ResourceConfig {
         return this.methods
     }
 
+    boolean allowsMediaTypeMethod( String mediaType, String method ) {
+        !this.unsupportedMediaTypeMethods.get(mediaType)?.contains( method )
+    }
+
+    def getUnsupportedMediaTypeMethods() {
+        return this.unsupportedMediaTypeMethods
+    }
+
+    def getResourceMetadata() {
+        return this.resourceMetadata
+    }
+
     ResourceConfig representation(Closure c) {
         RepresentationDelegate delegate = new RepresentationDelegate(restConfig)
         c.delegate = delegate
@@ -80,11 +104,16 @@ class ResourceConfig {
             if (representations.get(mediaType) != null) {
                throw new AmbiguousRepresentationException( resourceName:name, mediaType:mediaType )
             }
+            if (!(delegate.representationMetadata instanceof Map)) {
+                throw new RepresentationMetadataNotMapException( resourceName: name, mediaType: mediaType )
+            }
             RepresentationConfig config = new RepresentationConfig(
                 mediaType:mediaType, marshallerFramework:delegate.marshallerFramework,
                 contentType:delegate.contentType,
                 jsonArrayPrefix:delegate.jsonArrayPrefix,
-                marshallers:delegate.marshallers, extractor:delegate.extractor )
+                marshallers:delegate.marshallers, extractor:delegate.extractor,
+                allMediaTypes: delegate.mediaTypes,
+                representationMetadata: delegate.representationMetadata)
 
             //if we are using the json or xml marshalling framework, check
             //if we have default marshallers that should be automatically used
@@ -144,6 +173,27 @@ class ResourceConfig {
             methods.each {
                 if (!(Methods.getAllMethods().contains( it ))) {
                     throw new UnknownMethodException( resourceName:name, methodName: it )
+                }
+            }
+        }
+        if (!(unsupportedMediaTypeMethods instanceof Map)) {
+            throw new UnsupportedMediaTypeMethodsNotMapException( resourceName: name )
+        }
+        if (!(resourceMetadata instanceof Map)) {
+            throw new ResourceMetadataNotMapException( resourceName: name )
+        }
+        if (unsupportedMediaTypeMethods != null) {
+            unsupportedMediaTypeMethods.each { itEntry ->
+                if (representations.get(itEntry.key) == null) {
+                    throw new UnsupportedMediaTypeMethodsUnknownMediaTypeException( resourceName: name, mediaType: itEntry.key )
+                }
+                if (!(itEntry.value instanceof Collection)) {
+                    throw new UnsupportedMediaTypeMethodsMapValueNotCollectionException( resourceName: name, mediaType: itEntry.key )
+                }
+                itEntry.value.each {
+                    if (!(Methods.getAllMethods().contains( it ))) {
+                        throw new UnknownMediaTypeMethodException( resourceName:name, mediaType:itEntry.key, methodName: it )
+                    }
                 }
             }
         }

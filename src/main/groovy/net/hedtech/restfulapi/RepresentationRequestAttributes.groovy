@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
+ * Copyright 2018 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package net.hedtech.restfulapi
 
-class ResponseHolder {
-    Object data
-    def headers = [:]
-    def message
-    def isQapi = false
+/**
+ * Request attributes used to hold a representation.
+ **/
+class RepresentationRequestAttributes {
 
-    void addHeader( String name, Object value ) {
-        if (!headers[name]) {
-            headers[name] = []
-        }
-        headers[name].add value?.toString()
-    }
+    public static final String RESPONSE_REPRESENTATION = 'net.hedtech.restfulapi.RestfulApiController.response_representation'
+    public static final String REQUEST_REPRESENTATION = 'net.hedtech.restfulapi.RestfulApiController.request_representation'
+
 }

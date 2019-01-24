@@ -27,7 +27,6 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 
-
 /*
   Attribution:
   Based on the rest-client-builder plugin by Graeme Rocher.

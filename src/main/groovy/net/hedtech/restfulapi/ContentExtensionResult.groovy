@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
+ * Copyright 2017 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package net.hedtech.restfulapi
 
-class ResponseHolder {
-    Object data
-    def headers = [:]
-    def message
-    def isQapi = false
 
-    void addHeader( String name, Object value ) {
-        if (!headers[name]) {
-            headers[name] = []
-        }
-        headers[name].add value?.toString()
-    }
+/**
+ * Result from extending request and response content. Contains the
+ * extended content and indicators on how the content was extended.
+ * Please see README.md for a full explanation.
+ **/
+class ContentExtensionResult {
+
+    //The new extended content
+    def content
+
+    //Flag to summarize if the process resulted in content that was successfully extended
+    boolean extensionsApplied = false
 }

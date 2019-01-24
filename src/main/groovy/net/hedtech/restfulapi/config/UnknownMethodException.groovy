@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 package net.hedtech.restfulapi.config
 
 /**
- * Exception thrown when two representations for a resource
- * have the same media type.
+ * Exception thrown when a resource references an unknown method.
  **/
 class UnknownMethodException extends RuntimeException {
     String resourceName
