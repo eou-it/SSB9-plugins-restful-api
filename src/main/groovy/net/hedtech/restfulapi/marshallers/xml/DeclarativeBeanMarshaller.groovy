@@ -15,8 +15,6 @@
  *****************************************************************************/
 package net.hedtech.restfulapi.marshallers.xml
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import grails.converters.XML
 import groovy.lang.GroovyObject
@@ -32,8 +30,6 @@ import org.springframework.beans.BeanWrapper
 
 class DeclarativeBeanMarshaller extends BeanMarshaller {
 
-    protected static final Log log =
-        LogFactory.getLog(DeclarativeBeanMarshaller.class)
 
     Class supportClass
     String elementName

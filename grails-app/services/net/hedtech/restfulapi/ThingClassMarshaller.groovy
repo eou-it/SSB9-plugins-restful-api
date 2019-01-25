@@ -17,8 +17,6 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import grails.core.GrailsDomainClassProperty
 
@@ -30,9 +28,6 @@ import org.springframework.beans.BeanWrapper
  **/
 class ThingClassMarshaller extends BasicDomainClassMarshaller {
 
-
-    protected static final Log log =
-        LogFactory.getLog(ThingClassMarshaller.class)
 
 
     public ThingClassMarshaller(app) {

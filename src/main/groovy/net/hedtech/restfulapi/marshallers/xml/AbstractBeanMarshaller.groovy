@@ -17,6 +17,7 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.util.GrailsNameUtils
+import groovy.util.logging.Slf4j
 
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Field
@@ -26,8 +27,7 @@ import java.lang.reflect.Modifier
 import net.hedtech.restfulapi.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+
 
 import grails.core.GrailsApplication
 import org.grails.web.converters.marshaller.NameAwareMarshaller
@@ -48,11 +48,11 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
  * fields.
  * The class can be extended to override how an object is marshalled.
  **/
+
+@Slf4j
 abstract
 class AbstractBeanMarshaller implements ObjectMarshaller<XML>, NameAwareMarshaller {
 
-    protected static final Log log =
-        LogFactory.getLog(AbstractBeanMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set

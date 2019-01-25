@@ -20,8 +20,6 @@ import grails.util.GrailsNameUtils
 
 import net.hedtech.restfulapi.Inflector
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import org.grails.core.artefact.DomainClassArtefactHandler as DCAH
 import grails.core.GrailsApplication
@@ -44,8 +42,6 @@ import org.springframework.beans.BeanWrapperImpl
 
 class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
 
-    protected static final Log log =
-        LogFactory.getLog(DeclarativeDomainClassMarshaller.class)
 
     Class supportClass
     def fieldNames = [:]

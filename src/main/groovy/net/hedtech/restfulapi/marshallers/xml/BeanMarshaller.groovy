@@ -15,8 +15,6 @@
  *****************************************************************************/
 package net.hedtech.restfulapi.marshallers.xml
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import grails.converters.XML
 import groovy.lang.GroovyObject
@@ -40,8 +38,6 @@ import org.springframework.beans.BeanWrapper
  **/
 class BeanMarshaller extends AbstractBeanMarshaller {
 
-    protected static final Log log =
-        LogFactory.getLog(BeanMarshaller.class)
 
     private static List EXCLUDED_FIELDS =
         Arrays.asList('password', 'metaClass', 'class')

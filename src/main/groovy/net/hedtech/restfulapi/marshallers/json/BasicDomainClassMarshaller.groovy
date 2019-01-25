@@ -17,12 +17,10 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
-
+import groovy.util.logging.Slf4j
 import net.hedtech.restfulapi.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import org.grails.core.artefact.DomainClassArtefactHandler as DCAH
 import grails.core.GrailsApplication
@@ -50,10 +48,10 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
  * Supports any grails domain class.
  * The class can be extended to override how an object is marshalled.
  **/
+
+@Slf4j
 class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 
-    protected static final Log log =
-        LogFactory.getLog(BasicDomainClassMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set
