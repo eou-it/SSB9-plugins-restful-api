@@ -1,4 +1,27 @@
-package net.hedtech.restfulapi;
+/*
+ * ModeShape (http://www.modeshape.org)
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * See the AUTHORS.txt file in the distribution for a full listing of
+ * individual contributors.
+ *
+ * ModeShape is free software. Unless otherwise indicated, all code in ModeShape
+ * is licensed to you under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * ModeShape is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+package org.modeshape.common.text;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -7,16 +30,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Since Inflator from grails inflector:0.2 is not available for Grails 3,
- * the source code from inflector:0.2 is used here as a GrailsInflator.java.
- * If alternative for the inflector is available then that can be used
- * in replacement for this class.
+ * Transforms words to singular, plural, humanized (human readable), underscore, camel case, or ordinal form. This is inspired by
+ * the <a href="http://api.rubyonrails.org/classes/Inflector.html">Inflector</a> class in <a
+ * href="http://www.rubyonrails.org">Ruby on Rails</a>, which is distributed under the <a
+ * href="http://wiki.rubyonrails.org/rails/pages/License">Rails license</a>.
  */
 
-public class GrailsInflector {
-    protected static final GrailsInflector INSTANCE = new GrailsInflector();
+public class Inflector {
 
-    public static final GrailsInflector getInstance() {
+    protected static final Inflector INSTANCE = new Inflector();
+
+    public static final Inflector getInstance() {
         return INSTANCE;
     }
 
@@ -75,19 +99,19 @@ public class GrailsInflector {
      */
     private final Set<String> uncountables = new HashSet<String>();
 
-    public GrailsInflector() {
+    public Inflector() {
         initialize();
     }
 
-    protected GrailsInflector(GrailsInflector original ) {
+    protected Inflector( Inflector original ) {
         this.plurals.addAll(original.plurals);
         this.singulars.addAll(original.singulars);
         this.uncountables.addAll(original.uncountables);
     }
 
     @Override
-    public GrailsInflector clone() {
-        return new GrailsInflector(this);
+    public Inflector clone() {
+        return new Inflector(this);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -497,7 +521,7 @@ public class GrailsInflector {
     }
 
     protected void initialize() {
-        GrailsInflector inflect = this;
+        Inflector inflect = this;
         inflect.addPluralize("$", "s");
         inflect.addPluralize("s$", "s");
         inflect.addPluralize("(ax|test)is$", "$1es");
@@ -568,4 +592,5 @@ public class GrailsInflector {
             throw new IllegalArgumentException("Argument might not be null or zero length");
         }
     }
+
 }

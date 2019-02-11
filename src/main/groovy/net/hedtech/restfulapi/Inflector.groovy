@@ -16,7 +16,7 @@
 
 package net.hedtech.restfulapi
 
-import net.hedtech.restfulapi.GrailsInflector as Inf
+import org.modeshape.common.text.Inflector as Inf
 
 /**
  * Provide inflector methods. 
