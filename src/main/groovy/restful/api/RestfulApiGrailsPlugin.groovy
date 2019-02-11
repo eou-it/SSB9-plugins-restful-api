@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@ import grails.converters.JSON
 import net.hedtech.restfulapi.*
 import net.hedtech.restfulapi.marshallers.json.*
 
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder as CCH
-import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration as DCC
+import org.grails.web.converters.configuration.ConvertersConfigurationHolder as CCH
+import org.grails.web.converters.configuration.DefaultConverterConfiguration as DCC
 
 class RestfulApiGrailsPlugin {
 
-    def version = "1.1.0"
-    def grailsVersion = "2.2.0 > *"
+    def version = "1.7.0"
+    def grailsVersion = "3.3.2 > *"
     def pluginExcludes = [
-        "grails-app/views/**",
-        "web-app/**"
+            "grails-app/views/**",
+            "web-app/**"
     ]
 
     def title = "RESTful API Plugin"
     def author = "Charles Hardt, Shane Riddell"
     def authorEmail = "shane_riddell@icloud.com"
     def developers = [
-        [name: "Charlie Hardt", email: "chasdev@me.com"]
+            [name: "Charlie Hardt", email: "chasdev@me.com"]
     ]
     def description = '''\
         |The resful-api plugin facilitates exposing a non-trivial,

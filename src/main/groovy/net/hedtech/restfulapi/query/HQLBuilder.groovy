@@ -17,11 +17,9 @@
 package net.hedtech.restfulapi.query
 
 import grails.gorm.DetachedCriteria
-
+import groovy.util.logging.Slf4j
 import net.hedtech.restfulapi.Inflector
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import grails.core.GrailsApplication
 import grails.core.GrailsDomainClass
@@ -42,12 +40,11 @@ https://github.com/padcom/grails-restful-gorm/blob/master/src/java/org/grails/pl
  * A builder that creates an HQL statement along with a map of named parameters,
  * ready for execution.
  **/
+@Slf4j
 class HQLBuilder {
 
     private static def filterRE = /filter\[([0-9]+)\]\[(field|operator|value)\]=(.*)/
     private static final Range ALIASES = 'a'..'p'
-
-    protected static final Log log = LogFactory.getLog(HQLBuilder.class)
 
 
     /**

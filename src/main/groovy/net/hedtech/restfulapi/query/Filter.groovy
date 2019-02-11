@@ -20,8 +20,6 @@ import grails.gorm.DetachedCriteria
 
 import net.hedtech.restfulapi.Inflector
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import grails.core.GrailsApplication
 import grails.core.GrailsDomainClass
@@ -53,8 +51,6 @@ class Filter {
     private static List STRING_TYPES        = ['string']
     private static List DATE_TYPES          = ['date']
     private static List SUPPORTED_TYPES     = STRING_TYPES + NUMERIC_TYPES + DATE_TYPES
-
-    protected static final Log log = LogFactory.getLog(Filter.class)
 
     public String field
     public String operator
