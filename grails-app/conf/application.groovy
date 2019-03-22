@@ -17,40 +17,46 @@ log4j = {
     warn   'org.mortbay.log'
 
     error 'org.codehaus.groovy.grails',
-          'org.springframework',
-          'org.hibernate',
-          'net.sf.ehcache.hibernate'
+            'org.springframework',
+            'org.hibernate',
+            'net.sf.ehcache.hibernate'
 }
 restfulApiConfig = {
     // Resources for web_app_extensibility plugin
-        resource 'extensions' config {
-      //  def a = new BasicDomainClassMarshaller()
-       // println a
+    resource 'extensions' config {
+        //  def a = new BasicDomainClassMarshaller()
+        // println a
     }
 }
 dataSource {
-        driverClassName = "oracle.jdbc.OracleDriver"
-        url="jdbc:oracle:thin:@localhost:1521:ban83"
-        username="ban_ss_user"
-        password="u_pick_it"
-        dialect = "org.hibernate.dialect.Oracle10gDialect"
-        loggingSql = false
+    driverClassName = "oracle.jdbc.OracleDriver"
+    url="jdbc:oracle:thin:@localhost:1521:ban83"
+    username="ban_ss_user"
+    password="u_pick_it"
+    dialect = "org.hibernate.dialect.Oracle10gDialect"
+    loggingSql = false
 }
 
 
 hibernate {
     cache.use_second_level_cache = true
-    cache.use_query_cache = true
-    cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory'
-    //hbm2ddl.auto = null
+    cache.use_query_cache = false
+    cache.region.factory_class = 'org.hibernate.cache.SingletonEhCacheRegionFactory' // Hibernate 3
+//  cache.region.factory_class = 'org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory' // Hibernate 4
+    singleSession = true // configure OSIV singleSession mode
+    flush.mode = 'manual' // OSIV session flush mode outside of transactional context
+    flush.mode = 'manual' // OSIV session flush mode outside of transactional context
+//  cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
     show_sql = false
-    packagesToScan="net.hedtech.**.*"
-    flush.mode = AUTO
+    // naming_strategy = "org.hibernate.cfg.ImprovedNamingStrategy"
     dialect = "org.hibernate.dialect.Oracle10gDialect"
-   /* config.location = [
-            "classpath:hibernate-banner-core.cfg.xml",
-            "classpath:hibernate-banner-core.testing.cfg.xml"
+    packagesToScan="net.hedtech.**.*, com.sungardhe.*"
+    /*config.location = [
+            "classpath:events_hibernate.cfg.xml",
+            "classpath:cdcadmin_hibernate.cfg.xml",
+            "classpath:hibernate-banner-general-utility.cfg.xml"
     ]*/
+
 }
 
 /*
