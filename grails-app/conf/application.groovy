@@ -45,18 +45,11 @@ hibernate {
 //  cache.region.factory_class = 'org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory' // Hibernate 4
     singleSession = true // configure OSIV singleSession mode
     flush.mode = 'manual' // OSIV session flush mode outside of transactional context
-    flush.mode = 'manual' // OSIV session flush mode outside of transactional context
 //  cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
     show_sql = false
     // naming_strategy = "org.hibernate.cfg.ImprovedNamingStrategy"
     dialect = "org.hibernate.dialect.Oracle10gDialect"
     packagesToScan="net.hedtech.**.*, com.sungardhe.*"
-    /*config.location = [
-            "classpath:events_hibernate.cfg.xml",
-            "classpath:cdcadmin_hibernate.cfg.xml",
-            "classpath:hibernate-banner-general-utility.cfg.xml"
-    ]*/
-
 }
 
 /*
