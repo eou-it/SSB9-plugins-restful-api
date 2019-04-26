@@ -107,6 +107,9 @@ class RestfulApiController {
     String pageMax
     String pageOffset
 
+    // Content filter configuration (optionally configured within resources.groovy)
+    //  - restContentFilter is configured as a spring bean resource in resources.groovy
+    ContentFilter restContentFilter
 
     /**
      * Initializes the controller by registering the configured marshallers.
@@ -166,6 +169,12 @@ class RestfulApiController {
                     }
                 }
             }
+        }
+
+        // register content filter
+        restContentFilter = getSpringBean('restContentFilter')
+        if (restContentFilter) {
+            log.trace "Registered restContentFilter spring bean"
         }
 
         log.trace 'Done initializing RestfulApiController...'
@@ -306,59 +315,93 @@ class RestfulApiController {
     // PUT/PATCH /api/pluralizedResourceName/id
     //
     public def update() {
-        log.trace "update() invoked for ${params.pluralizedResourceName}/${params.id}"
+        log.trace "update() invoked for ${params.pluralizedResourceName}/${params.id} - request_id=${request.request_id}"
         def result
 
         try {
             checkMethod( Methods.UPDATE )
-            def content = parseRequestContent( request )
-            if (content && content.id && content.id != params.id) {
-                throw new IdMismatchException( params.pluralizedResourceName )
-            }
-
+            def content = parseRequestContent( request, params.pluralizedResourceName, Methods.UPDATE )
+            checkId(content)
             getResponseRepresentation()
-            result = getServiceAdapter().update( getService(), params.id, content, params )
+            result = getServiceAdapter().update( getService(), content, params )
             response.setStatus( 200 )
             renderSuccessResponse( new ResponseHolder( data: result ),
-                                   'default.rest.updated.message' )
+                    'default.rest.updated.message' )
         }
         catch (e) {
-            messageLog.error "Caught exception ${e.message}", e
+            logMessageError(e)
             renderErrorResponse(e)
         }
     }
-
 
     // DELETE /api/pluralizedResourceName/id
     //
     public def delete() {
-        log.trace "delete() invoked for ${params.pluralizedResourceName}/${params.id}"
+        log.trace "delete() invoked for ${params.pluralizedResourceName}/${params.id} - request_id=${request.request_id}"
+
         try {
             checkMethod( Methods.DELETE )
             def content = [:]
-            //Using angular in some browsers causes the Content-Type header
-            //to be set as application/xml or some other default for zero-length
-            //bodies, instead of a configured type.
-            //If we have a delete with a zero-length body,
-            //we will skip parsing the request content and use an
-            //empty map.
-            if (request.getContentLength() != 0) {
-                content = parseRequestContent( request )
+            ResourceConfig config = getResourceConfig()
+            if (config.bodyExtractedOnDelete) {
+                content = parseRequestContent( request, params.pluralizedResourceName, Methods.DELETE )
+            } else {
+                def types = mediaTypeParser.parse( request.getHeader(HttpHeaders.CONTENT_TYPE) )
+                types.each { type ->
+                    checkMediaTypeMethod( type.name, Methods.DELETE )
+                }
             }
-            if (content && content.id && content.id != params.id) {
-                throw new IdMismatchException( params.pluralizedResourceName )
-            }
-            getServiceAdapter().delete( getService(), params.id, content, params )
+            checkId(content)
+            getServiceAdapter().delete( getService(), content, params )
             response.setStatus( 200 )
             renderSuccessResponse( new ResponseHolder(), 'default.rest.deleted.message' )
         }
         catch (e) {
-            messageLog.error "Caught exception ${e.message}", e
+            logMessageError(e)
             renderErrorResponse(e)
         }
     }
 
+    protected checkId(Map content) {
+        if (content && content.containsKey('id') && getResourceConfig().idMatchEnforced) {
+            String contentId = content.id == null ? null : content.id.toString()
+            if (contentId != params.id) {
+                throw new IdMismatchException( params.pluralizedResourceName )
+            }
+        }
+    }
 
+    protected logMessageError(Throwable e) {
+        messageLog.error "Caught exception: ${e.message != null ? e.message : ''}", e
+    }
+
+    protected void checkMediaTypeMethod( String mediaType, String method ) {
+        def resource = getResourceConfig()
+        if (!resource) {
+            throw new UnsupportedResourceException( params.pluralizedResourceName )
+        }
+        if (!resource.allowsMediaTypeMethod( mediaType, method ) ) {
+            def allowed = resource.getMethods().intersect( Methods.getMethodGroup( method ) ) - resource.getUnsupportedMediaTypeMethods().get(mediaType)
+            throw new UnsupportedMethodException( supportedMethods:allowed )
+        }
+    }
+
+    protected def getSpringBean( String beanName, boolean required = false ) {
+
+        log.trace "Looking for a Spring bean named $beanName"
+        def bean
+        try {
+            bean = applicationContext.getBean(beanName)
+        } catch (e) { // it is not an error if we cannot find an adapter
+            if (required) {
+                log.error "Did not find a bean named $beanName - ${e.message}", e
+                throw e
+            } else {
+                log.trace "Did not find a bean named $beanName - ${e.message}"
+            }
+        }
+        bean
+    }
 // ---------------------------- Helper Methods -------------------------------
 
 
@@ -682,6 +725,47 @@ class RestfulApiController {
     }
 
 
+    protected Map parseRequestContent( request, String resource, String method ) {
+
+        ResourceConfig resourceConfig = getResourceConfig( resource )
+        def representation = getRequestRepresentation( resource )
+
+        checkMediaTypeMethod( representation.mediaType, method )
+
+        Extractor extractor = ExtractorConfigurationHolder.getExtractor( resourceConfig.name, representation.mediaType )
+        if (!extractor) {
+            unsupportedRequestRepresentation()
+        }
+
+        def extractorAdapter = getExtractorAdapter()
+
+        // optional: perform filtering of request content, except for these cases:
+        //  - qapi requests (a form of query using the content body in place of params)
+        //  - delete method which only requires the key of a resource
+        //  - create requests if configured to bypass
+        //  - update requests if configured to bypass
+        if (restContentFilter && !(resource == 'query-filters' ||
+                method == Methods.DELETE ||
+                (method == Methods.CREATE && restContentFilter.bypassCreateRequest) ||
+                (method == Methods.UPDATE && restContentFilter.bypassUpdateRequest))) {
+            def contentType = selectContentTypeForResponse( representation )
+            log.trace("Filtering content for resource=$resource with contentType=$contentType")
+            try {
+                ContentFilterHolder.set([
+                        contentFilter: restContentFilter,
+                        resourceName: resource,
+                        contentType: contentType
+                ])
+                return extractorAdapter.extract(extractor, request)
+            } finally {
+                ContentFilterHolder.clear()
+            }
+        }
+
+        return extractorAdapter.extract(extractor, request)
+    }
+
+
     /**
      * Maps an exception to an error type known to the controller.
      * @param e the exception to map
@@ -900,11 +984,15 @@ class RestfulApiController {
 
 
     private RepresentationConfig getRequestRepresentation( String resource = params.pluralizedResourceName ) {
-        def types = mediaTypeParser.parse( request.getHeader(HttpHeaders.CONTENT_TYPE) )
-        def type = types.size() > 0 ? [types[0]] : []
-        def representation = getRepresentation( resource, type )
+        def representation = request.getAttribute( RepresentationRequestAttributes.REQUEST_REPRESENTATION )
         if (representation == null) {
-            unsupportedRequestRepresentation()
+            def types = mediaTypeParser.parse(request.getHeader(HttpHeaders.CONTENT_TYPE))
+            def type = types.size() > 0 ? [types[0]] : []
+            representation = getRepresentation(resource, type)
+            if (representation == null) {
+                unsupportedRequestRepresentation()
+            }
+            request.setAttribute( RepresentationRequestAttributes.REQUEST_REPRESENTATION, representation )
         }
         return representation
     }
