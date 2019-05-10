@@ -20,7 +20,6 @@ import grails.converters.JSON
 import grails.converters.XML
 import grails.core.GrailsApplication
 import grails.validation.ValidationException
-import groovy.util.logging.Slf4j
 
 import java.security.*
 
@@ -65,7 +64,7 @@ import org.apache.commons.logging.LogFactory
  * necessary.  (If a stateful controller is needed, this
  * should not be used as a base class.)
  **/
-@Slf4j
+
 class RestfulApiController {
 
     // Because this controller is stateless, a single instance
