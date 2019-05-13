@@ -14,14 +14,10 @@
  * limitations under the License.
  *****************************************************************************/
 
-import grails.converters.JSON
 import grails.plugins.Plugin
-import net.hedtech.restfulapi.*
-import net.hedtech.restfulapi.marshallers.json.*
-
-import org.grails.web.converters.configuration.ConvertersConfigurationHolder as CCH
-import org.grails.web.converters.configuration.DefaultConverterConfiguration as DCC
-
+import groovy.util.logging.Slf4j
+import net.hedtech.restfulapi.RestfulApiController
+@Slf4j
 class RestfulApiGrailsPlugin extends Plugin{
 
     def version = "1.7.0"
@@ -52,15 +48,11 @@ class RestfulApiGrailsPlugin extends Plugin{
 
     def license = "APACHE"
 
-
-// ----------------------------------------------------------------------------
-
-    def doWithApplicationContext = { applicationContext ->
-        // Initialize the Restful API controller (so it will register JSON and XML marshallers)
-        //
-        def artefact = application.getArtefactByLogicalPropertyName("Controller", "restfulApi")
-        def restfulApiController = applicationContext.getBean(artefact.clazz.name)
+    void doWithApplicationContext() {
+        def artefact = grailsApplication.getArtefactByLogicalPropertyName("Controller", "restfulApi")
+        RestfulApiController restfulApiController = applicationContext.getBean(artefact.clazz.name) as RestfulApiController
         restfulApiController.init()
     }
+    
 }
 
