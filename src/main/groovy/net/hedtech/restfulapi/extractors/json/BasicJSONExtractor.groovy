@@ -18,6 +18,7 @@ package net.hedtech.restfulapi.extractors.json
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
+import net.hedtech.restfulapi.ContentFilterHolder
 import net.hedtech.restfulapi.extractors.*
 import org.grails.web.json.*
 
@@ -233,7 +234,7 @@ class BasicJSONExtractor implements JSONExtractor {
      **/
     protected def unwrap(def content) {
         if (content == null) return null
-        if (content == JSONObject.NULL) return null
+        if (content == JSONObject.Null) return null
         if (content instanceof Map) {
           Map map = [:]
           content.entrySet().each { entry ->

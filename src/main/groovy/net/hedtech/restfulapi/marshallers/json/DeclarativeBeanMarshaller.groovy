@@ -16,6 +16,8 @@
 
 package net.hedtech.restfulapi.marshallers.json
 
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import grails.converters.JSON
 import groovy.lang.GroovyObject
@@ -32,6 +34,8 @@ import org.springframework.beans.BeanWrapper
 
 class DeclarativeBeanMarshaller extends BeanMarshaller {
 
+    protected static final Log log =
+        LogFactory.getLog(DeclarativeBeanMarshaller.class)
 
     Class supportClass
     def fieldNames = [:]

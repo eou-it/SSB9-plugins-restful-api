@@ -19,7 +19,6 @@ package net.hedtech.restfulapi.exceptionhandlers
 import net.hedtech.restfulapi.ErrorResponse
 import net.hedtech.restfulapi.ExceptionHandler
 import net.hedtech.restfulapi.ExceptionHandlerContext
-import net.hedtech.restfulapi.Inflector
 
 class UnsupportedRequestRepresentationExceptionHandler implements ExceptionHandler {
 

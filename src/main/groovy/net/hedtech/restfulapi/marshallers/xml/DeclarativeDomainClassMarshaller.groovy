@@ -18,7 +18,8 @@ package net.hedtech.restfulapi.marshallers.xml
 import grails.converters.XML
 import grails.util.GrailsNameUtils
 
-
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.marshaller.xml.*
 import grails.util.GrailsClassUtils
 import grails.core.GrailsDomainClass
@@ -29,6 +30,8 @@ import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 
 class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
+        protected static final Log log =
+        LogFactory.getLog(DeclarativeDomainClassMarshaller.class)
 
     Class supportClass
     String elementName

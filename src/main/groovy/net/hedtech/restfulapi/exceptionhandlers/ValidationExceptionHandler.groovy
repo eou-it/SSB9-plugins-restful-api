@@ -19,7 +19,7 @@ package net.hedtech.restfulapi.exceptionhandlers
 import net.hedtech.restfulapi.ErrorResponse
 import net.hedtech.restfulapi.ExceptionHandler
 import net.hedtech.restfulapi.ExceptionHandlerContext
-import net.hedtech.restfulapi.Inflector
+import org.modeshape.common.text.Inflector
 
 class ValidationExceptionHandler implements ExceptionHandler {
 

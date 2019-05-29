@@ -17,31 +17,17 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
-
-import net.hedtech.restfulapi.Inflector
-
-
-import org.grails.core.artefact.DomainClassArtefactHandler as DCAH
-import grails.core.GrailsApplication
-import grails.util.GrailsClassUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
-import grails.core.support.proxy.EntityProxyHandler
-import org.grails.web.util.WebUtils
-import grails.core.support.proxy.DefaultProxyHandler
-import grails.core.support.proxy.ProxyHandler
-import grails.core.support.proxy.ProxyHandler
-import org.grails.web.converters.marshaller.json.*
-import org.grails.web.json.JSONWriter
 import org.grails.web.converters.exceptions.ConverterException
-import org.grails.web.converters.ConverterUtil
-import org.grails.web.converters.marshaller.ObjectMarshaller
-
 import org.springframework.beans.BeanWrapper
-import org.springframework.beans.BeanWrapperImpl
 
 class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
 
+    protected static final Log log =
+        LogFactory.getLog(DeclarativeDomainClassMarshaller.class)
 
     Class supportClass
     def fieldNames = [:]

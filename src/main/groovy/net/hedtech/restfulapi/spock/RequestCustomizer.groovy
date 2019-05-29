@@ -21,7 +21,7 @@ import grails.converters.XML
 import grails.web.JSONBuilder
 import groovy.xml.StreamingMarkupBuilder
 
-/*import org.grails.plugins.codecs.Base64Code*/
+/*import org.codehaus.groovy.grails.plugins.codecs.Base64Codec*/
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.UrlResource

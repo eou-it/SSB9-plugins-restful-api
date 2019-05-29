@@ -18,6 +18,7 @@ package net.hedtech.restfulapi
 
 import org.modeshape.common.text.Inflector as Inf
 
+
 /**
  * Provide inflector methods. 
  * Includes pluralize, singularize, camelCase, hyphenate, etc.
@@ -35,7 +36,7 @@ class Inflector {
 
     public static String asPropertyName(String source) {
         def s = inflector.singularize(source)
-        Inflector.camelCase(s)
+        org.modeshape.common.text.Inflector.camelCase(s)
     }
 
 

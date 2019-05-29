@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
+import spock.lang.*
 
 
 /*
@@ -34,7 +35,7 @@ import org.springframework.web.client.RestTemplate
   Based on the functional-test plugin by Marc Palmer.
   See <a href="http://grails.org/plugin/functional-test"/>
 */
-abstract class RestSpecification{
+abstract class RestSpecification  {
 
     def response
 

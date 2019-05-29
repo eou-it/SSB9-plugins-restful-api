@@ -17,16 +17,15 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import groovy.util.logging.Slf4j
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
-import net.hedtech.restfulapi.Inflector
+import org.modeshape.common.text.Inflector
 
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
 import grails.util.GrailsNameUtils
 
@@ -36,8 +35,6 @@ import org.grails.web.converters.marshaller.ObjectMarshaller
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.ProxyHandler
 import org.grails.web.json.JSONWriter
-import org.springframework.beans.BeanUtils
-
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -46,14 +43,14 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 /**
  * A bean marshaller.
  * By default, it will marshall all properties and public (non-static/non-transient)
- *  * fields.
+ * fields.
  * The class can be extended to override how an object is marshalled.
  **/
-
-@Slf4j
 abstract
 class AbstractBeanMarshaller implements ObjectMarshaller<JSON> {
 
+    protected static final Log log =
+        LogFactory.getLog(AbstractBeanMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set
