@@ -16,6 +16,7 @@
 
 package net.hedtech.restfulapi.marshallers.json
 
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -50,7 +51,7 @@ class BeanMarshaller extends AbstractBeanMarshaller {
     public boolean supports(Object object) {
         !(object instanceof Collection) &&
         !(object instanceof Map) &&
-        !GrailsClassUtils.isJdk5Enum(object.getClass())
+        !RestfulGeneralUtility.isJdk5Enum(object.getClass())
     }
 
     @Override

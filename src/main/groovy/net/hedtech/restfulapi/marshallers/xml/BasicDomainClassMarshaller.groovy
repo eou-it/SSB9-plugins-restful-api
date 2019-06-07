@@ -16,29 +16,25 @@
 package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
-import grails.util.GrailsNameUtils
-
-import org.modeshape.common.text.Inflector
-import net.hedtech.restfulapi.marshallers.MissingFieldsException
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.grails.web.converters.marshaller.NameAwareMarshaller
-import org.grails.core.artefact.DomainClassArtefactHandler
 import grails.core.GrailsApplication
-import grails.util.GrailsClassUtils
 import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
-import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
+import grails.util.GrailsNameUtils
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
+import net.hedtech.restfulapi.marshallers.MissingFieldsException
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.grails.core.artefact.DomainClassArtefactHandler
 import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.NameAwareMarshaller
 import org.grails.web.converters.marshaller.ObjectMarshaller
-
+import org.modeshape.common.text.Inflector
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
-
 
 /**
  * A default domain class marshaller.
@@ -389,7 +385,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
         GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
 
-        if (referencedDomainClass == null || property.isEmbedded() || GrailsClassUtils.isJdk5Enum(property.getType())) {
+        if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
             //hand off to marshaller chain
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a fully rendered object")
             startNode(beanWrapper, property, xml)

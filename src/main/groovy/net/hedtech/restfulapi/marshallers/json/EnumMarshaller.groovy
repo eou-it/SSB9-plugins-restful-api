@@ -17,6 +17,7 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 
 import java.lang.reflect.Method
 
@@ -33,7 +34,7 @@ import org.springframework.beans.BeanUtils
 public class EnumMarshaller implements ObjectMarshaller<JSON> {
 
     public boolean supports(Object object) {
-        return GrailsClassUtils.isJdk5Enum(object.getClass())
+        return RestfulGeneralUtility.isJdk5Enum(object.getClass())
     }
 
     public void marshalObject(Object en, JSON json) throws ConverterException {

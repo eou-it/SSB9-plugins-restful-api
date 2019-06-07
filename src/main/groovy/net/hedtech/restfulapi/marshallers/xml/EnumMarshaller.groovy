@@ -17,6 +17,7 @@
 package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 
 import java.lang.reflect.Method
 
@@ -32,7 +33,7 @@ import org.springframework.beans.BeanUtils
 public class EnumMarshaller implements ObjectMarshaller<XML> {
 
     public boolean supports(Object object) {
-        GrailsClassUtils.isJdk5Enum(object.getClass())
+        RestfulGeneralUtility.isJdk5Enum(object.getClass())
     }
 
     public void marshalObject(Object en, XML xml) throws ConverterException {

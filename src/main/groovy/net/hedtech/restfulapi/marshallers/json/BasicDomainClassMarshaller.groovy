@@ -17,7 +17,7 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
-
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import org.modeshape.common.text.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
@@ -373,7 +373,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
         GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
 
-        if (referencedDomainClass == null || property.isEmbedded() || GrailsClassUtils.isJdk5Enum(property.getType())) {
+        if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
             //hand off to marshaller chain
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a fully rendered object")
             writeFieldName(beanWrapper, property, json)
