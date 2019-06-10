@@ -56,7 +56,7 @@ class RestfulApiGrailsPlugin extends Plugin{
 // ----------------------------------------------------------------------------
     void doWithApplicationContext() {
         def artefact = grailsApplication.getArtefactByLogicalPropertyName("Controller", "restfulApi")
-        RestfulApiController restfulApiController = applicationContext.getBean(artefact.clazz.name) as RestfulApiController
+        RestfulApiController restfulApiController = applicationContext.getBean(artefact.clazz.name)
         restfulApiController.init()
     }
 }
