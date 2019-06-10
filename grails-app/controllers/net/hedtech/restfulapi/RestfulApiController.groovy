@@ -18,6 +18,7 @@ package net.hedtech.restfulapi
 
 import grails.converters.JSON
 import grails.converters.XML
+import grails.core.GrailsApplication
 
 import java.security.*
 
@@ -77,6 +78,8 @@ class RestfulApiController {
     private mediaTypeParser = new MediaTypeParser()
 
     private RestConfig restConfig
+
+    GrailsApplication grailsApplication
 
     private messageLog = LogFactory.getLog( 'RestfulApiController_messageLog' )
 

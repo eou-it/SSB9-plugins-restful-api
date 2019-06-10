@@ -54,12 +54,9 @@ class RestfulApiGrailsPlugin extends Plugin{
 
 
 // ----------------------------------------------------------------------------
-
-    def doWithApplicationContext = { applicationContext ->
-        // Initialize the Restful API controller (so it will register JSON and XML marshallers)
-        //
-        def artefact = application.getArtefactByLogicalPropertyName("Controller", "restfulApi")
-        def restfulApiController = applicationContext.getBean(artefact.clazz.name)
+    void doWithApplicationContext() {
+        def artefact = grailsApplication.getArtefactByLogicalPropertyName("Controller", "restfulApi")
+        RestfulApiController restfulApiController = applicationContext.getBean(artefact.clazz.name)
         restfulApiController.init()
     }
 }
