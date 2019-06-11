@@ -17,11 +17,14 @@
 package net.hedtech.restfulapi
 
 import java.security.*
-
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static java.util.UUID.randomUUID
 
 
 class EtagGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger( EtagGenerator.class );
 
     /**
      * Returns an etag value for the specified resource model and
