@@ -3,14 +3,19 @@ package net.hedtech.restfulapi.Utility
 class RestfulGeneralUtility {
 
     public static boolean isJdk5Enum(Class<?> type) {
-        boolean flag = false
-        if (RestfulGeneralUtility.getVersion()< 5 && type instanceof Class && ((Class<?>)type).isEnum()){
-            flag = true
+        if (RestfulGeneralUtility.checkJdkVersion()< 5 ){
+            return false
         }
-        return flag
+
+        if(type instanceof Class && ((Class<?>)type).isEnum()) {
+            return true
+        }
+        else{
+            return false
+        }
     }
 
-    private static int groovyVersionCheck(){
+    private static int checkJdkVersion(){
         String version = System.getProperty("java.runtime.version");
         String[] verArray= version.split(/[.]/)
         String ver = version.startsWith("1.")?verArray[1]: verArray[0]
