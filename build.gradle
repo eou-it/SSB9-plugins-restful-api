@@ -34,6 +34,7 @@ repositories {
 bootRepackage.enabled = false
 
 dependencies {
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.8"
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"
     compile "org.grails:grails-core"
