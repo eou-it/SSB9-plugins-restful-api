@@ -19,6 +19,8 @@ package net.hedtech.restfulapi
 import grails.converters.JSON
 import grails.converters.XML
 import grails.core.GrailsApplication
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import java.security.*
 
@@ -681,7 +683,8 @@ class RestfulApiController {
             case ~/json/:
                 log.trace "Going to useJSON with representation $representation"
                 useJSON(representation) {
-                    result = (data as JSON) as String
+                    ObjectMapper mapperObj = new ObjectMapper();
+                    result = mapperObj.writeValueAsString(data);
 
                     // add a prefix if configured to protect from a JSON Array
                     // vulnerability to CSRF attack.
@@ -695,7 +698,8 @@ class RestfulApiController {
             case ~/xml/:
                 log.trace "Going to useXML with representation $representation"
                 useXML(representation) {
-                    result = (data as XML) as String
+                    XmlMapper mapperObj = new XmlMapper();
+                    result = mapperObj.writeValueAsString(data);
                 }
                 break
             default:
