@@ -74,9 +74,6 @@ dependencies {
     testRuntime "org.seleniumhq.selenium:selenium-firefox-driver:3.6.0"
     testRuntime "org.seleniumhq.selenium:selenium-remote-driver:3.6.0"
     testRuntime "org.seleniumhq.selenium:selenium-api:3.6.0"
-    // Added for BannerXE - Oracle jars - specified as physical path
-    compile files("lib/ojdbc6-11.2.0.1.0.jar")
-    runtime files("lib/xdb6-11.2.0.4.jar")
 }
 
 bootRun {
