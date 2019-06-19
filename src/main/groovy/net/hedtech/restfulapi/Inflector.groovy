@@ -36,7 +36,7 @@ class Inflector {
 
     public static String asPropertyName(String source) {
         def s = inflector.singularize(source)
-        org.modeshape.common.text.Inflector.camelCase(s)
+        Inflector.camelCase(s)
     }
 
 
