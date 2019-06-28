@@ -753,7 +753,9 @@ class RestfulApiController {
 
         responseHolder.headers.each { header ->
             header.value.each() { val ->
-                response.addHeader( header.key, val )
+                if (header.key) {
+                    response.addHeader( header.key, val )
+                }
             }
         }
 
