@@ -695,7 +695,7 @@ class RestfulApiController {
             case ~/xml/:
                 log.trace "Going to useXML with representation $representation"
                 useXML(representation) {
-                    result = (data as JSON) as String
+                    result = (data as XML) as String
                 }
                 break
             default:
