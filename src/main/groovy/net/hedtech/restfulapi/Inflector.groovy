@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class Inflector {
 
     public static String asPropertyName(String source) {
         def s = inflector.singularize(source)
-        org.modeshape.common.text.Inflector.camelCase(s)
+        Inflector.camelCase(s)
     }
 
 
