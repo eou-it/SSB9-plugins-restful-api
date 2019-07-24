@@ -19,44 +19,18 @@ package net.hedtech.restfulapi
 import grails.converters.JSON
 import grails.converters.XML
 import grails.core.GrailsApplication
-
-import java.security.*
-
-import static java.util.UUID.randomUUID
-
-import javax.annotation.PostConstruct
-
-import net.hedtech.restfulapi.marshallers.StreamWrapper
-
-import net.hedtech.restfulapi.config.*
-
+import grails.web.http.HttpHeaders
+import net.hedtech.restfulapi.config.RepresentationConfig
+import net.hedtech.restfulapi.config.ResourceConfig
+import net.hedtech.restfulapi.config.RestConfig
 import net.hedtech.restfulapi.exceptionhandlers.*
-
-import net.hedtech.restfulapi.extractors.*
-import net.hedtech.restfulapi.extractors.configuration.*
-
-import org.grails.web.json.JSONArray
-import org.grails.web.json.JSONElement
-import org.grails.web.json.JSONObject
-
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.dao.OptimisticLockingFailureException
-
-import org.grails.web.converters.configuration.ConvertersConfigurationHolder
-import org.grails.web.converters.configuration.ConverterConfiguration
-import org.grails.web.converters.configuration.DefaultConverterConfiguration
-import org.grails.web.converters.marshaller.ObjectMarshaller
-import org.grails.web.converters.Converter
-import org.grails.web.converters.configuration.ChainedConverterConfiguration
+import net.hedtech.restfulapi.extractors.Extractor
+import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHolder
+import net.hedtech.restfulapi.marshallers.StreamWrapper
+import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
 
-import grails.web.http.HttpHeaders
-
-import org.grails.web.util.GrailsApplicationAttributes
-import org.apache.commons.logging.LogFactory
+import static java.util.UUID.randomUUID
 
 /**
  * A Restful API controller.
@@ -398,17 +372,17 @@ class RestfulApiController {
                 delegate.lastModified {
                     lastModifiedFor( result )
                 }
+                ResponseHolder holder = new ResponseHolder()
+                holder.data = result
+                if (hasTotalCount) {
+                    holder.addHeader(totalCountHeader, count)
+                }
+                holder.addHeader(pageOffsetHeader, requestParams.offset ? requestParams?.offset : 0)
+                holder.addHeader(pageMaxHeader, requestParams.max ? requestParams?.max : result.size())
+                if (request.method == "POST") {
+                    holder.isQapi = true
+                }
                 generate {
-                    ResponseHolder holder = new ResponseHolder()
-                    holder.data = result
-                    if (hasTotalCount) {
-                        holder.addHeader(totalCountHeader, count)
-                    }
-                    holder.addHeader(pageOffsetHeader, requestParams.offset ? requestParams?.offset : 0)
-                    holder.addHeader(pageMaxHeader, requestParams.max ? requestParams?.max : result.size())
-                    if (request.method == "POST") {
-                        holder.isQapi = true
-                    }
                     renderSuccessResponse( holder, 'default.rest.list.message' )
                 }
             }

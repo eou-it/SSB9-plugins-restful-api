@@ -16,30 +16,25 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import grails.util.GrailsNameUtils
-import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
-import org.modeshape.common.text.Inflector
-import net.hedtech.restfulapi.marshallers.MissingFieldsException
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-
-import org.grails.core.artefact.DomainClassArtefactHandler
 import grails.core.GrailsApplication
-import grails.util.GrailsClassUtils
 import grails.core.GrailsDomainClass
 import grails.core.GrailsDomainClassProperty
-import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.DefaultProxyHandler
+import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
-import org.grails.web.json.JSONWriter
+import grails.util.GrailsNameUtils
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
+import net.hedtech.restfulapi.marshallers.MissingFieldsException
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.grails.core.artefact.DomainClassArtefactHandler
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.ObjectMarshaller
-
+import org.grails.web.json.JSONWriter
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
-
+import net.hedtech.restfulapi.Inflector
 
 /**
  * A default domain class marshaller.

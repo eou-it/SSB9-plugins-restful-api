@@ -17,28 +17,23 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-
-import org.modeshape.common.text.Inflector
-
-import net.hedtech.restfulapi.marshallers.MissingFieldsException
-
-import java.beans.PropertyDescriptor
-import java.lang.reflect.Field
-
-import grails.util.GrailsNameUtils
-
 import grails.core.GrailsApplication
-import org.grails.web.converters.exceptions.ConverterException
-import org.grails.web.converters.marshaller.ObjectMarshaller
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.ProxyHandler
+import grails.util.GrailsNameUtils
+import net.hedtech.restfulapi.Inflector
+import net.hedtech.restfulapi.marshallers.MissingFieldsException
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.web.json.JSONWriter
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
+import java.beans.PropertyDescriptor
+import java.lang.reflect.Field
 
 /**
  * A bean marshaller.

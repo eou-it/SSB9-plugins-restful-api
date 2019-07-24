@@ -21,7 +21,7 @@ import grails.util.GrailsNameUtils
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Field
 
-import org.modeshape.common.text.Inflector
+import net.hedtech.restfulapi.Inflector
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 
 import org.apache.commons.logging.Log
