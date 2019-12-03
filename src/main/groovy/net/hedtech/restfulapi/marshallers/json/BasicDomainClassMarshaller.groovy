@@ -23,11 +23,19 @@ import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
+import grails.util.Holders
 import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.mapping.model.PersistentEntity
+import org.grails.datastore.mapping.model.PersistentProperty
+import org.grails.datastore.mapping.model.types.Association
+import org.grails.datastore.mapping.model.types.Embedded
+import org.grails.datastore.mapping.model.types.ManyToOne
+import org.grails.datastore.mapping.model.types.OneToOne
+import org.grails.web.converters.ConverterUtil
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.web.json.JSONWriter
@@ -46,7 +54,7 @@ import net.hedtech.restfulapi.Inflector
 class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 
     protected static final Log log =
-        LogFactory.getLog(BasicDomainClassMarshaller.class)
+            LogFactory.getLog(BasicDomainClassMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set
@@ -56,7 +64,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 
 
     private static List EXCLUDED_FIELDS = Arrays.asList('lastModified', 'lastModifiedBy',
-                                                        'dataOrigin', 'createdBy', 'password')
+            'dataOrigin', 'createdBy', 'password')
 
 
 // ------------------------------- Constructors -------------------------------
@@ -78,19 +86,21 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         log.trace "$this marshalObject() called for $clazz"
         JSONWriter writer = json.getWriter()
         value = getProxyHandler().unwrapIfProxy(value)
-        GrailsDomainClass domainClass = app.getDomainClass(clazz.getName())
+        //GrailsDomainClass domainClass = app.getDomainClass(clazz.getName())
+        PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(ConverterUtil.trimProxySuffix(clazz.getName()))
         BeanWrapper beanWrapper = new BeanWrapperImpl(value)
-        GrailsDomainClassProperty[] persistentProperties = domainClass.getPersistentProperties()
+        //GrailsDomainClassProperty[] persistentProperties = domainClass.getPersistentProperties()
+        PersistentProperty[] persistentProperties = domainClass.getPersistentProperties()
 
         writer.object()
 
         if (includeIdFor(value)) {
-            def id = extractValue(value, domainClass.getIdentifier())
+            def id = extractValue(value, domainClass.getIdentity())
             json.property("id", id)
         }
 
         if (includeVersionFor(value)) {
-            GrailsDomainClassProperty versionProperty = domainClass.getVersion()
+            PersistentProperty versionProperty = domainClass.getVersion()
             Object version = extractValue(value, versionProperty)
             json.property("version", version)
         }
@@ -120,10 +130,10 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
             }
         }
 
-        for (GrailsDomainClassProperty property: propertiesToMarshall) {
+        for (PersistentProperty property: propertiesToMarshall) {
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz")
             if (processField(beanWrapper, property, json)) {
-                if (property.isAssociation()) {
+                if (property instanceof Association) {
                     marshallAssociationField(beanWrapper, property, json)
                 } else {
                     marshallSimpleField(beanWrapper,property,json)
@@ -139,7 +149,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 
     @Override
     public boolean supports(Object object) {
-        DomainClassArtefactHandler.isDomainClass(object.getClass())
+        //DomainClassArtefactHandler.isDomainClass(object.getClass())
+        PersistentEntity domain = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(object.getClass().getName())
+        if ( domain != null ) {
+            return true
+        }
+        return false
     }
 
     /**
@@ -148,7 +163,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
      * @return the name to use when marshalling the field,
      *         or null if the domain field name should be used
      */
-    protected String getSubstitutionName(BeanWrapper beanWrapper,GrailsDomainClassProperty property) {
+    protected String getSubstitutionName(BeanWrapper beanWrapper,PersistentProperty property) {
         null
     }
 
@@ -222,7 +237,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
      *
      **/
     protected boolean processField(BeanWrapper beanWrapper,
-                                   GrailsDomainClassProperty property,
+                                   PersistentProperty property,
                                    JSON json) {
         true
     }
@@ -261,7 +276,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
      * @return true if the value of the field should be deep rendered,
      *         false if a short-object representation should be used.
      **/
-    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, GrailsDomainClassProperty property) {
+    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, PersistentProperty property) {
         return false
     }
 
@@ -271,7 +286,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 // ------------------- Methods to support marshalling ---------------------
 
     protected def writeFieldName(BeanWrapper beanWrapper,
-                                 GrailsDomainClassProperty property,
+                                 PersistentProperty property,
                                  JSON json) {
         JSONWriter writer = json.getWriter()
         def propertyName = getSubstitutionName(beanWrapper,property)
@@ -281,21 +296,21 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         writer.key(propertyName)
     }
 
-    protected Object extractValue(Object domainObject, GrailsDomainClassProperty property) {
+    protected Object extractValue(Object domainObject, PersistentProperty property) {
         BeanWrapper beanWrapper = new BeanWrapperImpl(domainObject)
         return beanWrapper.getPropertyValue(property.getName())
     }
 
-    protected Object extractIdForReference( Object refObj, GrailsDomainClass refDomainClass ) {
+    protected Object extractIdForReference( Object refObj, PersistentEntity refDomainClass ) {
         Object idValue
         if (getProxyHandler() instanceof EntityProxyHandler) {
             idValue = ((EntityProxyHandler) getProxyHandler()).getProxyIdentifier(refObj)
             if (idValue == null) {
-                idValue = extractValue(refObj, refDomainClass.getIdentifier())
+                idValue = extractValue(refObj, refDomainClass.getIdentity())
             }
         }
         else {
-            idValue = extractValue(refObj, refDomainClass.getIdentifier())
+            idValue = extractValue(refObj, refDomainClass.getIdentity())
         }
         idValue
     }
@@ -308,10 +323,10 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
      * @param refObj the referenced object
      * @param json the JSON converter to marshall to
      */
-    protected void asShortObject(GrailsDomainClassProperty property, Object refObj, JSON json) throws ConverterException {
-        GrailsDomainClass refDomainClass = property.getReferencedDomainClass()
+    protected void asShortObject(PersistentProperty property, Object refObj, JSON json) throws ConverterException {
+        PersistentEntity refDomainClass = ((Association) property).getAssociatedEntity()
         Object id = extractIdForReference( refObj, refDomainClass )
-        def domainName = GrailsNameUtils.getPropertyName(refDomainClass.shortName)
+        def domainName = refDomainClass.getName()
         def resource = hyphenate(pluralize(domainName))
         JSONWriter writer = json.getWriter()
         writer.object()
@@ -320,7 +335,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
     }
 
 
-    protected void marshallSimpleField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, JSON json) {
+    protected void marshallSimpleField(BeanWrapper beanWrapper, PersistentProperty property, JSON json) {
         log.trace "$this marshalObject() handling field '${property.getName()}' for ${beanWrapper.getWrappedInstance().getClass().getName()} as a simple field"
         //simple property
         writeFieldName(beanWrapper, property, json)
@@ -329,7 +344,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         json.convertAnother(val)
     }
 
-    protected void marshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, JSON json) {
+    protected void marshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, JSON json) {
         if (deepMarshallAssociation(beanWrapper,property)) {
             deepMarshallAssociationField(beanWrapper, property, json)
         } else {
@@ -337,7 +352,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         }
     }
 
-    protected void deepMarshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, JSON json) {
+    protected void deepMarshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, JSON json) {
         log.trace "$this deepMarshallAssociationField handling field '${property.getName()}' for ${beanWrapper.getWrappedInstance().getClass().getName()} as a deep-marshalled association"
         writeFieldName(beanWrapper, property, json)
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
@@ -360,20 +375,21 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         }
     }
 
-    protected void shallowMarshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, JSON json) {
+    protected void shallowMarshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, JSON json) {
         Class<?> clazz = beanWrapper.getWrappedInstance().getClass()
         log.trace( "$this shallowMarshallowAssociationField() handling field '${property.getName()}' for $clazz as an shallow association")
 
         JSONWriter writer = json.getWriter()
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
 
-        if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
+        //if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
+        if (referencedDomainClass == null || property instanceof Embedded) {
             //hand off to marshaller chain
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a fully rendered object")
             writeFieldName(beanWrapper, property, json)
             json.convertAnother(getProxyHandler().unwrapIfProxy(referenceObject))
-        } else if (property.isOneToOne() || property.isManyToOne()) {
+        } else if (property instanceof OneToOne || property instanceof ManyToOne) {
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a short object")
             writeFieldName(beanWrapper, property, json)
             if (referenceObject == null) {
@@ -397,12 +413,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         }
     }
 
-    protected void marshallAssociationCollection(GrailsDomainClassProperty property, Object referenceObject, JSON json) {
+    protected void marshallAssociationCollection(PersistentProperty property, Object referenceObject, JSON json) {
         Collection o = (Collection) referenceObject
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
-        GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
+        PersistentProperty referencedIdProperty = referencedDomainClass.getIdentity()
         @SuppressWarnings("unused")
-        String refPropertyName = referencedDomainClass.getPropertyName()
+        String refPropertyName = referencedDomainClass.getName()
 
         JSONWriter writer = json.getWriter()
         writer.array()
@@ -412,12 +428,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         writer.endArray()
     }
 
-    protected void marshallAssociationMap(GrailsDomainClassProperty property, Object referenceObject, JSON json) {
+    protected void marshallAssociationMap(PersistentProperty property, Object referenceObject, JSON json) {
         Map<Object, Object> map = (Map<Object, Object>) referenceObject
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
-        GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
+        PersistentProperty referencedIdProperty = referencedDomainClass.getIdentity()
         @SuppressWarnings("unused")
-        String refPropertyName = referencedDomainClass.getPropertyName()
+        String refPropertyName = referencedDomainClass.getName()
 
         JSONWriter writer = json.getWriter()
         writer.object()
