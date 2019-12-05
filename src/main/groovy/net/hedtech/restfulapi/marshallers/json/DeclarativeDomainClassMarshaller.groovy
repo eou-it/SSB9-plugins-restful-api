@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2019 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,15 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.util.Holders
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import groovy.util.logging.Slf4j
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.types.Association
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.beans.BeanWrapper
 
+@Slf4j
 class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
-
-    protected static final Log log =
-            LogFactory.getLog(DeclarativeDomainClassMarshaller.class)
 
     Class supportClass
     def fieldNames = [:]

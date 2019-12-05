@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2019 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.types.Association
@@ -47,10 +46,8 @@ import net.hedtech.restfulapi.Inflector
  * Supports any grails domain class.
  * The class can be extended to override how an object is marshalled.
  **/
+@Slf4j
 class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
-
-    protected static final Log log =
-            LogFactory.getLog(BasicDomainClassMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set
