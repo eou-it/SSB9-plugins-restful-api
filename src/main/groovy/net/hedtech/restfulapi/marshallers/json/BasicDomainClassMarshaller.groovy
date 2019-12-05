@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,14 @@ package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
 import grails.core.GrailsApplication
-import grails.core.GrailsDomainClass
-import grails.core.GrailsDomainClassProperty
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
 import grails.util.Holders
-import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.grails.core.artefact.DomainClassArtefactHandler
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.types.Association
@@ -86,10 +82,8 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         log.trace "$this marshalObject() called for $clazz"
         JSONWriter writer = json.getWriter()
         value = getProxyHandler().unwrapIfProxy(value)
-        //GrailsDomainClass domainClass = app.getDomainClass(clazz.getName())
         PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(ConverterUtil.trimProxySuffix(clazz.getName()))
         BeanWrapper beanWrapper = new BeanWrapperImpl(value)
-        //GrailsDomainClassProperty[] persistentProperties = domainClass.getPersistentProperties()
         PersistentProperty[] persistentProperties = domainClass.getPersistentProperties()
 
         writer.object()
@@ -149,7 +143,6 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
 
     @Override
     public boolean supports(Object object) {
-        //DomainClassArtefactHandler.isDomainClass(object.getClass())
         PersistentEntity domain = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(object.getClass().getName())
         if ( domain != null ) {
             return true
@@ -383,7 +376,6 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<JSON> {
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
         PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
 
-        //if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
         if (referencedDomainClass == null || property instanceof Embedded) {
             //hand off to marshaller chain
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a fully rendered object")

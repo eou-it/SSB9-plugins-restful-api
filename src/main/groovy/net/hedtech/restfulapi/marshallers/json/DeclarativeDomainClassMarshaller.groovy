@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import grails.util.GrailsNameUtils
 import grails.util.Holders
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import grails.core.GrailsDomainClass
-import grails.core.GrailsDomainClassProperty
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.types.Association
@@ -42,7 +39,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
     def includeVersion = true
     //If a field is a key in the map, then represents
     //a field-level override for whether to marshall that
-    //field if null.  Otherise, marshallNullFields is used
+    //field if null.  Otherwise, marshallNullFields is used
     //to determine whether to marshall a field if null
     def marshalledNullFields = [:]
     //default behavior on whether to marshall null fields.
@@ -193,7 +190,6 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
         if (!map['resourceName']) {
             map['resourceName'] = getDerivedResourceName(beanWrapper)
         }
-        //GrailsDomainClass domainClass = app.getDomainClass(beanWrapper.getWrappedInstance().getClass().getName())
         PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(beanWrapper.getWrappedInstance().getClass().getName())
         map['resourceId'] = beanWrapper.getPropertyValue(domainClass.getIdentity().getName())
         additionalFieldClosures.each { c ->
@@ -252,7 +248,6 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
      */
     @Override
     protected void asShortObject(PersistentProperty property, Object refObj, JSON json) throws ConverterException {
-        //GrailsDomainClass refDomainClass = property.getReferencedDomainClass()
         PersistentEntity refDomainClass = ((Association) property).getAssociatedEntity()
         Object id = extractIdForReference( refObj, refDomainClass )
         def resource = fieldResourceNames[property.getName()]
