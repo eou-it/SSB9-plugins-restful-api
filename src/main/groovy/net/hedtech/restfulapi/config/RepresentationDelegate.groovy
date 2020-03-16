@@ -24,6 +24,7 @@ class RepresentationDelegate {
     def marshallers = []
     def extractor
     def representationMetadata = [:]
+    String representationServiceName
 
     private RestConfig restConfig
 

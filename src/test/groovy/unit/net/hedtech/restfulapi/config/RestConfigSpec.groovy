@@ -1535,4 +1535,30 @@ class RestConfigSpec extends Specification {
         'things' == e.resourceName
         'application/vnd.hedtech.v0+json' == e.mediaType
     }
+
+    def "Test service name override by representation service name"() {
+        setup:
+        def src =
+                {
+                    resource 'things' config {
+                        serviceName = 'TheThingService'
+                        representation {
+                            representationServiceName = 'TheThingRepresentationService'
+                            mediaTypes = ['application/vnd.hedtech.v0+json']
+                            marshallers {
+
+                            }
+                            extractor = null
+                        }
+                    }
+
+                }
+
+        when:
+        def config = RestConfig.parse( grailsApplication, src )
+
+        then:
+        1 == config.resources.size()
+        'TheThingRepresentationService' == config.resources['things'].representations.get('application/vnd.hedtech.v0+json').representationServiceName
+    }
 }

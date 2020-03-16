@@ -24,7 +24,7 @@ import org.grails.web.converters.configuration.DefaultConverterConfiguration
 
 class RestfulApiGrailsPlugin extends Plugin{
 
-    def version = "1.8.0"
+    def version = "1.9.0"
     def grailsVersion = "3.3.2 > *"
     def pluginExcludes = [
         "grails-app/views/**",

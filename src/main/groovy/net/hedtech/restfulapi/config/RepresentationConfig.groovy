@@ -28,6 +28,7 @@ class RepresentationConfig {
     def representationMetadata = [:]
     def allMediaTypes = []
     ApiVersion apiVersion
+    String representationServiceName
 
 
     /**

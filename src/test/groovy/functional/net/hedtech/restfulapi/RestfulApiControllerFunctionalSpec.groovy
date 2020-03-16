@@ -2076,6 +2076,26 @@ class RestfulApiControllerFunctionalSpec extends RestSpecification {
         "dev"                     == json.tenant
     }
 
+    def "Test ability to use a representation-specific service"() {
+        setup:
+        createThing('AA')
+        createThing('BB')
+
+        when:
+        get( "$localBase/api/representation-things/" ) {
+            headers['Content-Type']  = 'application/json'
+            headers['Accept']        = 'application/json'
+        }
+
+        then:
+        200 == response.status
+        'application/json' == response.contentType
+
+        def json = JSON.parse response.text
+        2 == json.code.size()
+        "List of representation-thing resources" == responseHeader('X-hedtech-message')
+    }
+
     @Ignore // This test requires configuration on the test machine.
             // Specifically, edit the 'hosts' file to add 'test.local'
             // as an additional host mapped to 127.0.0.1 before re-enabling this test.
