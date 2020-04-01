@@ -19,6 +19,7 @@ package net.hedtech.restfulapi
 import grails.converters.JSON
 import grails.converters.XML
 import grails.core.GrailsApplication
+import grails.util.Holders
 import grails.web.http.HttpHeaders
 import net.hedtech.restfulapi.config.RepresentationConfig
 import net.hedtech.restfulapi.config.ResourceConfig
@@ -29,6 +30,8 @@ import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHol
 import net.hedtech.restfulapi.marshallers.StreamWrapper
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
+import org.springframework.context.ApplicationContext
+
 
 import static java.util.UUID.randomUUID
 
@@ -1002,7 +1005,9 @@ class RestfulApiController {
         log.trace "Looking for a Spring bean named $beanName"
         def bean
         try {
-            bean = applicationContext.getBean(beanName)
+
+            ApplicationContext ctx = (ApplicationContext) Holders.grailsApplication.getMainContext()
+            bean = ctx.getBean(beanName)
         } catch (e) { // it is not an error if we cannot find an adapter
             if (required) {
                 log.error "Did not find a bean named $beanName - ${e.message}", e
