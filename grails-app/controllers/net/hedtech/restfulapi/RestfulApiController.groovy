@@ -1,5 +1,5 @@
 /* ***************************************************************************
- * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2020 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,7 +332,7 @@ class RestfulApiController {
             def logger = log            // ditto
 
             if (request.method == "POST") {
-                def queryCriteria = parseRequestContent( request, 'query-filters', Methods.LIST )
+                def queryCriteria = parseRequestContent( request, 'query-filters', Methods.LIST, params.pluralizedResourceName )
                 updatePagingQueryParams( queryCriteria ) // We'll ensure params uses expected Grails naming
                 requestParams << queryCriteria
             }
@@ -340,7 +340,10 @@ class RestfulApiController {
                 updatePagingQueryParams( requestParams ) // We'll ensure params uses expected Grails naming
             }
 
-            def service = getService()
+            def service = getRepresentationService(responseRepresentation)
+            if(!service) {
+                service = getService()
+            }
             def delegateToService = getServiceAdapter()
             logger.trace "... will delegate list() to service $service using adapter $delegateToService"
 
@@ -392,6 +395,9 @@ class RestfulApiController {
             renderErrorResponse(e)
             return
         }
+        finally{
+            try {session.invalidate()} catch(sessionInvalidateError) {}
+        }
     }
 
 
@@ -433,6 +439,9 @@ class RestfulApiController {
             logMessageError(e)
             renderErrorResponse(e)
         }
+        finally{
+            try {session.invalidate()} catch(sessionInvalidateError) {}
+        }
     }
 
 
@@ -456,6 +465,9 @@ class RestfulApiController {
             logMessageError(e)
             renderErrorResponse(e)
         }
+        finally{
+            try {session.invalidate()} catch(sessionInvalidateError) {}
+        }
     }
 
 
@@ -478,6 +490,9 @@ class RestfulApiController {
         catch (e) {
             logMessageError(e)
             renderErrorResponse(e)
+        }
+        finally{
+            try {session.invalidate()} catch(sessionInvalidateError) {}
         }
     }
 
@@ -507,6 +522,9 @@ class RestfulApiController {
         catch (e) {
             logMessageError(e)
             renderErrorResponse(e)
+        }
+        finally{
+            try {session.invalidate()} catch(sessionInvalidateError) {}
         }
     }
 
@@ -820,7 +838,12 @@ class RestfulApiController {
      * Returns a map representing the properties of content.
      * @param request the request containing the content
      **/
-    protected Map parseRequestContent( request, String resource, String method ) {
+    protected Map parseRequestContent( request, String resource, String method, String actualResource = null ) {
+
+        def isUsingQueryFilters = (resource == 'query-filters')
+        if (isUsingQueryFilters && actualResource && useHighestSemanticVersion) {
+            resource = actualResource
+        }
 
         ResourceConfig resourceConfig = getResourceConfig( resource )
         def representation = getRequestRepresentation( resource )
@@ -839,7 +862,7 @@ class RestfulApiController {
         //  - delete method which only requires the key of a resource
         //  - create requests if configured to bypass
         //  - update requests if configured to bypass
-        if (restContentFilter && !(resource == 'query-filters' ||
+        if (restContentFilter && !(isUsingQueryFilters ||
                                    method == Methods.DELETE ||
                                    (method == Methods.CREATE && restContentFilter.bypassCreateRequest) ||
                                    (method == Methods.UPDATE && restContentFilter.bypassUpdateRequest))) {
@@ -954,6 +977,23 @@ class RestfulApiController {
         adapter = adapter ?: defaultServiceAdapter
         log.trace "getServiceAdapter() will return adapter $adapter"
         adapter
+    }
+
+
+    protected def getRepresentationService(def responseRepresentation) {
+        //getRepresentation
+        def serviceName = responseRepresentation?.representationServiceName
+        if(!serviceName) {
+            serviceName = getResourceConfig()?.representations?.get(responseRepresentation?.mediaType)?.representationServiceName
+        }
+        log.trace "getRepresentationService() will return $serviceName"
+        def svc = getSpringBean( serviceName )
+        log.trace "getService() will return service $svc"
+        if (null == svc) {
+            log.warn "No representation service found for resource ${params.pluralizedResourceName}"
+        }
+        log.trace "representationService() will return service $svc"
+        svc
     }
 
 
