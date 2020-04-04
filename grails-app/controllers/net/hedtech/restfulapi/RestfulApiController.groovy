@@ -21,6 +21,7 @@ import grails.converters.XML
 import grails.core.GrailsApplication
 import grails.util.Holders
 import grails.web.http.HttpHeaders
+import groovy.util.logging.Slf4j
 import net.hedtech.restfulapi.config.RepresentationConfig
 import net.hedtech.restfulapi.config.ResourceConfig
 import net.hedtech.restfulapi.config.RestConfig
@@ -45,6 +46,7 @@ import static java.util.UUID.randomUUID
  * necessary.  (If a stateful controller is needed, this
  * should not be used as a base class.)
  **/
+@Slf4j
 class RestfulApiController {
 
     // Because this controller is stateless, a single instance
