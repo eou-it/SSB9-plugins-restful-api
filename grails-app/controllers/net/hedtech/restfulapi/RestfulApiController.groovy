@@ -181,7 +181,7 @@ class RestfulApiController {
             restConfig.validate()
 
             // Resource detail list (for reporting and discovery)
-            ResourceDetailList resourceDetailList = getSpringBean('resourceDetailList')
+                ResourceDetailList resourceDetailList = getSpringBean('resourceDetailList')
 
             restConfig.resources.values().each() { resource ->
                 ResourceDetail resourceDetail = new ResourceDetail()
