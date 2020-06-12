@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package net.hedtech.restfulapi.query
 
-
-import org.modeshape.common.text.Inflector
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-
+import grails.util.Holders
+import groovy.util.logging.Slf4j
+import net.hedtech.restfulapi.Inflector
 import grails.core.GrailsApplication
-import grails.core.GrailsDomainClass
-import grails.core.GrailsDomainClassProperty
+import org.grails.datastore.mapping.model.PersistentEntity
+import org.grails.datastore.mapping.model.PersistentProperty
+import org.grails.datastore.mapping.model.types.Association
+import org.grails.web.converters.ConverterUtil
 
 
 /**
@@ -36,6 +35,7 @@ import grails.core.GrailsDomainClassProperty
  * things?filter[0][field]=code&filter[1][value]=science&filter[0][operator]=eq&
  * filter[1][field]=description&filter[1][operator]=contains&filter[0][value]=ZZ&max=50
  **/
+@Slf4j
 class Filter {
 
     // Note the URL filters are not (yet) internationalizable
@@ -53,13 +53,11 @@ class Filter {
     private static List DATE_TYPES          = ['date']
     private static List SUPPORTED_TYPES     = STRING_TYPES + NUMERIC_TYPES + DATE_TYPES
 
-    protected static final Log log = LogFactory.getLog(Filter.class)
-
     public String field
     public String operator
     public def    value
     public String type // if null we'll assume the value is of type = String
-    public GrailsDomainClassProperty persistentProperty
+    public PersistentProperty persistentProperty
     public boolean isAssociation
     public boolean isMany
     private boolean valid = false
@@ -96,8 +94,8 @@ class Filter {
 
         if (!params.pluralizedResourceName) throw new RuntimeException("params map must contain 'pluralizedResourceName'")
 
-        GrailsDomainClass domainClass = params.domainClass ?: getGrailsDomainClass( application, params.pluralizedResourceName )
-        GrailsDomainClassProperty[] properties = domainClass.getProperties()
+        PersistentEntity domainClass = params.domainClass ?: getGrailsDomainClass( application, params.pluralizedResourceName )
+        PersistentProperty[] properties = domainClass.getProperties()
 
         // Now that we've created filters from the params map, we'll augment them
         // with a bit more information
@@ -145,9 +143,11 @@ class Filter {
     }
 
 
-    public static GrailsDomainClass getGrailsDomainClass(application, pluralizedResourceName) {
+    public static PersistentEntity getGrailsDomainClass(application, pluralizedResourceName) {
         def className = getDomainClassName(pluralizedResourceName)
-        application.domainClasses.find { it.clazz.simpleName == className }
+        Class<?> clazz = application.domainClasses.find { it.clazz.simpleName == className }.clazz
+        PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(ConverterUtil.trimProxySuffix(clazz.getName()))
+        return domainClass
     }
 
 
@@ -156,13 +156,13 @@ class Filter {
     }
 
 
-    public static GrailsDomainClassProperty findProperty(GrailsDomainClassProperty[] properties, String name) {
+    public static PersistentProperty findProperty(PersistentProperty[] properties, String name) {
         properties.find { it.name == name }
     }
 
 
-    public static boolean isDomainClassProperty(GrailsDomainClassProperty property) {
-        property?.getReferencedDomainClass() != null
+    public static boolean isDomainClassProperty(PersistentProperty property) {
+        ((Association) property).getAssociatedEntity() != null
     }
 
 }

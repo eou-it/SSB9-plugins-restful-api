@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 package net.hedtech.restfulapi.marshallers.json
 
 import grails.converters.JSON
-import grails.util.GrailsNameUtils
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import grails.core.GrailsDomainClass
-import grails.core.GrailsDomainClassProperty
+import grails.util.Holders
+import groovy.util.logging.Slf4j
+import org.grails.datastore.mapping.model.PersistentEntity
+import org.grails.datastore.mapping.model.PersistentProperty
+import org.grails.datastore.mapping.model.types.Association
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.beans.BeanWrapper
 
+@Slf4j
 class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
-
-    protected static final Log log =
-        LogFactory.getLog(DeclarativeDomainClassMarshaller.class)
 
     Class supportClass
     def fieldNames = [:]
@@ -38,7 +36,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
     def includeVersion = true
     //If a field is a key in the map, then represents
     //a field-level override for whether to marshall that
-    //field if null.  Otherise, marshallNullFields is used
+    //field if null.  Otherwise, marshallNullFields is used
     //to determine whether to marshall a field if null
     def marshalledNullFields = [:]
     //default behavior on whether to marshall null fields.
@@ -89,7 +87,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
      *         or null if the domain field name should be used
      */
     @Override
-    protected String getSubstitutionName(BeanWrapper beanWrapper,GrailsDomainClassProperty property) {
+    protected String getSubstitutionName(BeanWrapper beanWrapper, PersistentProperty property) {
         return fieldNames.get( property.getName() )
     }
 
@@ -155,7 +153,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
      **/
     @Override
     protected boolean processField(BeanWrapper beanWrapper,
-                                   GrailsDomainClassProperty property,
+                                   PersistentProperty property,
                                    JSON json) {
         boolean ignoreNull = false
         if (marshalledNullFields.containsKey(property.getName())) {
@@ -180,17 +178,17 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
         Map map = [:]
         map.putAll( additionalFieldsMap )
         map.putAll(
-            [
-                'grailsApplication':app,
-                'beanWrapper':beanWrapper,
-                'json':json
-            ]
+                [
+                        'grailsApplication':app,
+                        'beanWrapper':beanWrapper,
+                        'json':json
+                ]
         )
         if (!map['resourceName']) {
             map['resourceName'] = getDerivedResourceName(beanWrapper)
         }
-        GrailsDomainClass domainClass = app.getDomainClass(beanWrapper.getWrappedInstance().getClass().getName())
-        map['resourceId'] = beanWrapper.getPropertyValue(domainClass.getIdentifier().getName())
+        PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(beanWrapper.getWrappedInstance().getClass().getName())
+        map['resourceId'] = beanWrapper.getPropertyValue(domainClass.getIdentity().getName())
         additionalFieldClosures.each { c ->
             c.call( map )
         }
@@ -229,7 +227,7 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
      *         false if a short-object representation should be used.
      **/
     @Override
-    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, GrailsDomainClassProperty property) {
+    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, PersistentProperty property) {
         if (deepMarshalledFields.containsKey(property.getName())) {
             return deepMarshalledFields[property.getName()]
         } else {
@@ -246,21 +244,21 @@ class DeclarativeDomainClassMarshaller extends BasicDomainClassMarshaller {
      * @param json the JSON converter to marshall to
      */
     @Override
-    protected void asShortObject(GrailsDomainClassProperty property, Object refObj, JSON json) throws ConverterException {
-        GrailsDomainClass refDomainClass = property.getReferencedDomainClass()
+    protected void asShortObject(PersistentProperty property, Object refObj, JSON json) throws ConverterException {
+        PersistentEntity refDomainClass = ((Association) property).getAssociatedEntity()
         Object id = extractIdForReference( refObj, refDomainClass )
         def resource = fieldResourceNames[property.getName()]
         if (resource == null) {
-            def domainName = GrailsNameUtils.getPropertyName(refDomainClass.shortName)
+            def domainName = refDomainClass.getName()
             resource = hyphenate(pluralize(domainName))
         }
         Map map = [
-            grailsApplication:app,
-            property:property,
-            refObject:refObj,
-            json:json,
-            resourceId:id,
-            resourceName:resource
+                grailsApplication:app,
+                property:property,
+                refObject:refObj,
+                json:json,
+                resourceId:id,
+                resourceName:resource
         ]
         this.shortObjectClosure.call(map)
     }
