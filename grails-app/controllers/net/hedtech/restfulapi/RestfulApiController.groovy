@@ -425,6 +425,11 @@ class RestfulApiController {
             def requestParams = params  // accessible from within withCacheHeaders
             def logger = log            // ditto
 
+            //check to veify if its a custom-resource
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+            }
+
             def result = getServiceAdapter(resourceConfig).show( getService(resourceConfig), requestParams )
             // Need to create etagValue outside of 'etag' block:
             // http://jira.grails.org/browse/GPCACHEHEADERS-14
