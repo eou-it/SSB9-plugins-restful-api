@@ -336,6 +336,11 @@ class RestfulApiController {
             def responseRepresentation = getResponseRepresentation(resourceConfig) // adds representation attribute to request
             checkMediaTypeMethod( responseRepresentation.mediaType, Methods.LIST, resourceConfig )
 
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
+
             def requestParams = params  // accessible from within withCacheHeaders
             def logger = log            // ditto
 
@@ -428,6 +433,7 @@ class RestfulApiController {
             //check to veify if its a custom-resource
             if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
                 params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
             }
 
             def result = getServiceAdapter(resourceConfig).show( getService(resourceConfig), requestParams )
