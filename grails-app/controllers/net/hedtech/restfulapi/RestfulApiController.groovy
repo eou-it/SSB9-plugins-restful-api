@@ -401,7 +401,12 @@ class RestfulApiController {
             return
         }
         finally{
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            }
+            catch(sessionInvalidateError) {}
         }
     }
 
@@ -445,7 +450,11 @@ class RestfulApiController {
             renderErrorResponse(e)
         }
         finally{
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                session.invalidate()
+            }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -471,7 +480,11 @@ class RestfulApiController {
             renderErrorResponse(e)
         }
         finally{
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -497,7 +510,11 @@ class RestfulApiController {
             renderErrorResponse(e)
         }
         finally{
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -529,7 +546,11 @@ class RestfulApiController {
             renderErrorResponse(e)
         }
         finally{
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
