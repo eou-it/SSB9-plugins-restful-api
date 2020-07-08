@@ -28,6 +28,7 @@ import net.hedtech.restfulapi.config.RestConfig
 import net.hedtech.restfulapi.exceptionhandlers.*
 import net.hedtech.restfulapi.extractors.Extractor
 import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHolder
+import net.hedtech.restfulapi.extractors.json.DefaultJSONExtractor
 import net.hedtech.restfulapi.marshallers.StreamWrapper
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
@@ -480,7 +481,11 @@ class RestfulApiController {
             checkMethod(Methods.CREATE, resourceConfig)
             def content = parseRequestContent( request, params.pluralizedResourceName, Methods.CREATE, resourceConfig )
             log.trace "Extracted content $content"
-            getResponseRepresentation(resourceConfig)
+            def responseRepresentation = getResponseRepresentation(resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
             result = getServiceAdapter(resourceConfig).create( getService(resourceConfig), content, params )
             response.setStatus( 201 )
             renderSuccessResponse( new ResponseHolder( data: result ),
@@ -509,7 +514,11 @@ class RestfulApiController {
             checkMethod(Methods.UPDATE, resourceConfig)
             def content = parseRequestContent( request, params.pluralizedResourceName, Methods.UPDATE, resourceConfig )
             checkId(content, resourceConfig)
-            getResponseRepresentation(resourceConfig)
+            def responseRepresentation = getResponseRepresentation(resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
             result = getServiceAdapter(resourceConfig).update( getService(resourceConfig), content, params )
             response.setStatus( 200 )
             renderSuccessResponse( new ResponseHolder( data: result ),
@@ -545,6 +554,9 @@ class RestfulApiController {
                 }
             }
             checkId(content, resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+            }
             getServiceAdapter(resourceConfig).delete( getService(resourceConfig), content, params )
             response.setStatus( 200 )
             renderSuccessResponse(new ResponseHolder(), 'default.rest.deleted.message', resourceConfig)
@@ -877,8 +889,13 @@ class RestfulApiController {
         def representation = getRequestRepresentation( resource, resourceConfig )
 
         checkMediaTypeMethod( representation.mediaType, method, resourceConfig )
+        Extractor extractor = null
+        if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+            extractor = new DefaultJSONExtractor()
+        }else{
+            extractor  = ExtractorConfigurationHolder.getExtractor( resourceConfig.name, representation.mediaType )
+        }
 
-        Extractor extractor = ExtractorConfigurationHolder.getExtractor( resourceConfig.name, representation.mediaType )
         if (!extractor) {
             unsupportedRequestRepresentation()
         }
