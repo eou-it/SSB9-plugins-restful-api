@@ -555,7 +555,10 @@ class RestfulApiController {
             }
             checkId(content, resourceConfig)
             if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+
+                def responseRepresentation = getResponseRepresentation(resourceConfig)
                 params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
             }
             getServiceAdapter(resourceConfig).delete( getService(resourceConfig), content, params )
             response.setStatus( 200 )
