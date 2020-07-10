@@ -412,7 +412,12 @@ class RestfulApiController {
         }
         finally{
             log.trace "Invalidating the session in list method"
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            }
+            catch(sessionInvalidateError) {}
         }
     }
 
@@ -465,7 +470,11 @@ class RestfulApiController {
         }
         finally{
             log.trace "Invalidating the session in show method"
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                session.invalidate()
+            }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -498,7 +507,11 @@ class RestfulApiController {
         }
         finally{
             log.trace "Invalidating the session in create method"
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -531,7 +544,11 @@ class RestfulApiController {
         }
         finally{
             log.debug "Invalidating session in update method"
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
@@ -571,7 +588,11 @@ class RestfulApiController {
         }
         finally{
             log.debug "Invalidating session in delete method"
-            try {session.invalidate()} catch(sessionInvalidateError) {}
+            try {
+                if(Holders.config.apiOracleUsersProxied){
+                    session.invalidate()
+                }
+            } catch(sessionInvalidateError) {}
         }
     }
 
