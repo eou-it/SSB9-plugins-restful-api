@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 #1.9.0
 * Modify RestfulApiController to invalidate the session after the completion of each REST method as part of an overall solution to an application performance issue when not caching the database connection.
 * Allow service name to be specified at the representation level - list requests only - so that a single service can be used for multiple resources when the underlying functionality is the same (ex: bulk list requests using alternate representations).
