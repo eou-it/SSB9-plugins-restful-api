@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2013 Ellucian Company L.P. and its affiliates.
+ * Copyright 2013-2020 Ellucian Company L.P. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,27 @@ package net.hedtech.restfulapi.marshallers.xml
 
 import grails.converters.XML
 import grails.core.GrailsApplication
-import grails.core.GrailsDomainClass
-import grails.core.GrailsDomainClassProperty
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.core.support.proxy.EntityProxyHandler
 import grails.core.support.proxy.ProxyHandler
 import grails.util.GrailsNameUtils
-import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
+import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.restfulapi.marshallers.MissingFieldsException
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.mapping.model.PersistentEntity
+import org.grails.datastore.mapping.model.PersistentProperty
+import org.grails.datastore.mapping.model.types.Association
+import org.grails.datastore.mapping.model.types.Embedded
+import org.grails.datastore.mapping.model.types.ManyToOne
+import org.grails.datastore.mapping.model.types.OneToOne
+import org.grails.web.converters.ConverterUtil
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.converters.marshaller.NameAwareMarshaller
 import org.grails.web.converters.marshaller.ObjectMarshaller
-import org.modeshape.common.text.Inflector
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
+import net.hedtech.restfulapi.Inflector
 
 /**
  * A default domain class marshaller.
@@ -43,10 +46,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
  * Supports any grails domain class.
  * The class can be extended to override how an object is marshalled.
  **/
+@Slf4j
 class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMarshaller {
 
-    protected static final Log log =
-        LogFactory.getLog(BasicDomainClassMarshaller.class)
 
     GrailsApplication app
     //allow proxy handler to be explicitly set
@@ -76,20 +78,20 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
 
         Class<?> clazz = value.getClass()
         log.trace "$this marshalObject() called for $clazz"
-        value = getProxyHandler().unwrapIfProxy(value)
-        GrailsDomainClass domainClass = app.getDomainClass(clazz.getName())
+        value = getProxyHandler().unwrapIfProxy(value)       
+        PersistentEntity domainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(ConverterUtil.trimProxySuffix(clazz.getName()))
         BeanWrapper beanWrapper = new BeanWrapperImpl(value)
-        GrailsDomainClassProperty[] persistentProperties = domainClass.getPersistentProperties()
+        PersistentProperty[] persistentProperties = domainClass.getPersistentProperties()
 
         if (includeIdFor(value)) {
-            def id = extractValue(value, domainClass.getIdentifier())
+            def id = extractValue(value, domainClass.getIdentity())
             xml.startNode("id")
             xml.convertAnother(id)
             xml.end()
         }
 
-        if (includeVersionFor(value)) {
-            GrailsDomainClassProperty versionProperty = domainClass.getVersion()
+        if (includeVersionFor(value)) {           
+            PersistentProperty versionProperty = domainClass.getVersion()
             Object version = extractValue(value, versionProperty)
             xml.startNode("version")
             xml.convertAnother(version)
@@ -121,10 +123,10 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
             }
         }
 
-        for (GrailsDomainClassProperty property: propertiesToMarshall) {
+        for (PersistentProperty property: propertiesToMarshall) {
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz")
             if (processField(beanWrapper, property, xml)) {
-                if (property.isAssociation()) {
+                if (property instanceof Association) {
                     marshallAssociationField(beanWrapper, property, xml)
                 } else {
                     marshallSimpleField(beanWrapper,property,xml)
@@ -148,8 +150,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
 // ------------------- Methods to override to customize behavior ---------------------
 
     @Override
-    public boolean supports(Object object) {
-        DomainClassArtefactHandler.isDomainClass(object.getClass())
+    public boolean supports(Object object) {       
+        PersistentEntity domain = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(object.getClass().getName())
+        if ( domain != null ) {
+            return true
+        }
+        return false
     }
 
     /**
@@ -158,7 +164,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
      * @return the name to use when marshalling the field,
      *         or null if the domain field name should be used
      */
-    protected String getSubstitutionName(BeanWrapper beanWrapper,GrailsDomainClassProperty property) {
+    protected String getSubstitutionName(BeanWrapper beanWrapper,PersistentProperty property) {
         null
     }
 
@@ -230,7 +236,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
      *
      **/
     protected boolean processField(BeanWrapper beanWrapper,
-                                   GrailsDomainClassProperty property,
+                                   PersistentProperty property,
                                    XML xml) {
         true
     }
@@ -269,7 +275,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
      * @return true if the value of the field should be deep rendered,
      *         false if a short-object representation should be used.
      **/
-    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, GrailsDomainClassProperty property) {
+    protected boolean deepMarshallAssociation(BeanWrapper beanWrapper, PersistentProperty property) {
         return false
     }
 
@@ -278,7 +284,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
 // ------------------- Methods to support marshalling ---------------------
 
     protected def startNode(BeanWrapper beanWrapper,
-                            GrailsDomainClassProperty property,
+                            PersistentProperty property,
                             XML xml) {
         def propertyName = getSubstitutionName(beanWrapper,property)
         if (propertyName == null) {
@@ -299,21 +305,21 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         }
     }
 
-    protected Object extractValue(Object domainObject, GrailsDomainClassProperty property) {
+    protected Object extractValue(Object domainObject, PersistentProperty property) {
         BeanWrapper beanWrapper = new BeanWrapperImpl(domainObject)
         return beanWrapper.getPropertyValue(property.getName())
     }
 
-    protected Object extractIdForReference( Object refObj, GrailsDomainClass refDomainClass ) {
+    protected Object extractIdForReference( Object refObj, PersistentEntity refDomainClass ) {
         Object idValue
         if (getProxyHandler() instanceof EntityProxyHandler) {
             idValue = ((EntityProxyHandler) getProxyHandler()).getProxyIdentifier(refObj)
             if (idValue == null) {
-                idValue = extractValue(refObj, refDomainClass.getIdentifier())
+                idValue = extractValue(refObj, refDomainClass.getIdentity())
             }
         }
         else {
-            idValue = extractValue(refObj, refDomainClass.getIdentifier())
+            idValue = extractValue(refObj, refDomainClass.getIdentity())
         }
         idValue
     }
@@ -326,10 +332,10 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
      * @param refObj the referenced object
      * @param xml the XML converter to marshall to
      */
-    protected void asShortObject(GrailsDomainClassProperty property, Object refObj, XML xml) throws ConverterException {
-        GrailsDomainClass refDomainClass = property.getReferencedDomainClass()
+    protected void asShortObject(PersistentProperty property, Object refObj, XML xml) throws ConverterException {
+        PersistentEntity refDomainClass = ((Association) property).getAssociatedEntity()
         Object id = extractIdForReference( refObj, refDomainClass )
-        def domainName = GrailsNameUtils.getPropertyName(refDomainClass.shortName)
+        def domainName = refDomainClass.getName()
         def resource = hyphenate(pluralize(domainName))
         xml.startNode("_link")
         xml.convertAnother("/$resource/$id")
@@ -337,7 +343,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
     }
 
 
-    protected void marshallSimpleField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, XML xml) {
+    protected void marshallSimpleField(BeanWrapper beanWrapper, PersistentProperty property, XML xml) {
         log.trace "$this marshalObject() handling field '${property.getName()}' for ${beanWrapper.getWrappedInstance().getClass().getName()} as a simple field"
         //simple property
         startNode(beanWrapper, property, xml)
@@ -347,7 +353,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         xml.end()
     }
 
-    protected void marshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, XML xml) {
+    protected void marshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, XML xml) {
         if (deepMarshallAssociation(beanWrapper,property)) {
             deepMarshallAssociationField(beanWrapper, property, xml)
         } else {
@@ -355,7 +361,7 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         }
     }
 
-    protected void deepMarshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, XML xml) {
+    protected void deepMarshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, XML xml) {
         log.trace "$this deepMarshallAssociationField handling field '${property.getName()}' for ${beanWrapper.getWrappedInstance().getClass().getName()} as a deep-marshalled association"
         startNode(beanWrapper, property, xml)
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
@@ -377,21 +383,21 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         xml.end()
     }
 
-    protected void shallowMarshallAssociationField(BeanWrapper beanWrapper, GrailsDomainClassProperty property, XML xml) {
+    protected void shallowMarshallAssociationField(BeanWrapper beanWrapper, PersistentProperty property, XML xml) {
 
         Class<?> clazz = beanWrapper.getWrappedInstance().getClass()
         log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as an association")
 
         Object referenceObject = beanWrapper.getPropertyValue(property.getName())
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
 
-        if (referencedDomainClass == null || property.isEmbedded() || RestfulGeneralUtility.isJdk5Enum(property.getType())) {
+        if (referencedDomainClass == null || property instanceof Embedded) {
             //hand off to marshaller chain
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a fully rendered object")
             startNode(beanWrapper, property, xml)
             xml.convertAnother(getProxyHandler().unwrapIfProxy(referenceObject))
             xml.end()
-        } else if (property.isOneToOne() || property.isManyToOne()) {
+        } else if (property instanceof OneToOne || property instanceof ManyToOne) {
             log.trace( "$this marshalObject() handling field '${property.getName()}' for $clazz as a short object")
             startNode(beanWrapper, property, xml)
             if (referenceObject != null) {
@@ -413,12 +419,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         }
     }
 
-    protected void marshallAssociationCollection(GrailsDomainClassProperty property, Object referenceObject, XML xml) {
+    protected void marshallAssociationCollection(PersistentProperty property, Object referenceObject, XML xml) {
         Collection o = (Collection) referenceObject
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
-        GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
+        PersistentProperty referencedIdProperty = referencedDomainClass.getIdentity()
         @SuppressWarnings("unused")
-        String refPropertyName = referencedDomainClass.getPropertyName()
+        String refPropertyName = referencedDomainClass.getName()
 
         for (Object el: o) {
             xml.startNode("shortObject")
@@ -427,12 +433,12 @@ class BasicDomainClassMarshaller implements ObjectMarshaller<XML>, NameAwareMars
         }
     }
 
-    protected void marshallAssociationMap(GrailsDomainClassProperty property, Object referenceObject, XML xml) {
+    protected void marshallAssociationMap(PersistentProperty property, Object referenceObject, XML xml) {
         Map<Object, Object> map = (Map<Object, Object>) referenceObject
-        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
-        GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
+        PersistentEntity referencedDomainClass = ((Association) property).getAssociatedEntity()
+        PersistentProperty referencedIdProperty = referencedDomainClass.getIdentity()
         @SuppressWarnings("unused")
-        String refPropertyName = referencedDomainClass.getPropertyName()
+        String refPropertyName = referencedDomainClass.getName()
 
         for (Map.Entry<Object, Object> entry: map.entrySet()) {
             String key = String.valueOf(entry.getKey())
