@@ -29,10 +29,14 @@ import net.hedtech.restfulapi.exceptionhandlers.*
 import net.hedtech.restfulapi.extractors.Extractor
 import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHolder
 import net.hedtech.restfulapi.marshallers.StreamWrapper
+import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
+import org.jsoup.Jsoup
+import org.jsoup.safety.Whitelist
 import org.springframework.context.ApplicationContext
 
+import java.util.regex.Pattern
 
 import static java.util.UUID.randomUUID
 
@@ -631,8 +635,10 @@ class RestfulApiController {
         ResponseHolder responseHolder = new ResponseHolder()
         try {
             def handler = handlerConfig.getHandler(e)
+            def pluralizedResourceNameFromParam = sanitize(params.pluralizedResourceName)
+
             ExceptionHandlerContext context = new ExceptionHandlerContext(
-                        pluralizedResourceName:params.pluralizedResourceName,
+                        pluralizedResourceName: pluralizedResourceNameFromParam,
                         localizer:localizer)
 
             ErrorResponse result = handler.handle(e, context)
@@ -1287,5 +1293,16 @@ class RestfulApiController {
         handlerConfig.add(new ApplicationExceptionHandler(), -1)
 
         handlerConfig.add(new DefaultExceptionHandler(), Integer.MIN_VALUE)
+    }
+
+    private static String sanitize(def input) {
+        Pattern XSS_PATTERN = Pattern.compile("((\\%3C)|<)[^\\n]+((\\%3E)|>)", Pattern.CASE_INSENSITIVE)
+
+        if (input != null && input instanceof String) {
+            // remove known XSS input patterns
+            input = XSS_PATTERN.matcher(input).replaceAll("");
+        }
+
+        return input;
     }
 }
