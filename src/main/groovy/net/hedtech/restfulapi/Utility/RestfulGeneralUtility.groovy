@@ -1,3 +1,6 @@
+/* ******************************************************************************
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.restfulapi.Utility
 
 import java.util.regex.Pattern
@@ -26,10 +29,9 @@ class RestfulGeneralUtility {
         return Integer.parseInt(ver)
     }
 
-    public static String xssSanitize(def input) {
+    public static def xssSanitize(def input) {
         if (input != null && input instanceof String) {
-            // remove known XSS input patterns
-            input = XSS_PATTERN.matcher(input).replaceAll("");
+            input = XSS_PATTERN.matcher(input).replaceAll("")
         }
 
         return input;
