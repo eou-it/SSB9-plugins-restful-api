@@ -22,6 +22,7 @@ import grails.core.GrailsApplication
 import grails.util.Holders
 import grails.web.http.HttpHeaders
 import groovy.util.logging.Slf4j
+import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import net.hedtech.restfulapi.config.RepresentationConfig
 import net.hedtech.restfulapi.config.ResourceConfig
 import net.hedtech.restfulapi.config.RestConfig
@@ -32,7 +33,6 @@ import net.hedtech.restfulapi.marshallers.StreamWrapper
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.context.ApplicationContext
-
 
 import static java.util.UUID.randomUUID
 
@@ -631,8 +631,10 @@ class RestfulApiController {
         ResponseHolder responseHolder = new ResponseHolder()
         try {
             def handler = handlerConfig.getHandler(e)
+            def pluralizedResourceNameFromParam = RestfulGeneralUtility.xssSanitize(params.pluralizedResourceName)
+
             ExceptionHandlerContext context = new ExceptionHandlerContext(
-                        pluralizedResourceName:params.pluralizedResourceName,
+                        pluralizedResourceName: pluralizedResourceNameFromParam,
                         localizer:localizer)
 
             ErrorResponse result = handler.handle(e, context)
@@ -1288,4 +1290,5 @@ class RestfulApiController {
 
         handlerConfig.add(new DefaultExceptionHandler(), Integer.MIN_VALUE)
     }
+
 }

@@ -12,7 +12,7 @@ buildscript {
     }
 }
 
-version "9.34"
+version "9.35"
 group "restful.api"
 
 apply plugin:"eclipse"
@@ -56,7 +56,12 @@ dependencies {
     profile "org.grails.profiles:web-plugin"
     compile "org.grails.plugins:events"
     compile "org.grails.plugins:hibernate5"
-    compile "org.hibernate:hibernate-core:5.1.17.Final"
+    // START The excluding dom4j and upgrading it has to be removed while we are going for grails 4 migration.
+    compile ("org.hibernate:hibernate-core:5.1.17.Final") {
+        exclude module: "dom4j"
+    }
+    compile group: 'org.dom4j', name: 'dom4j', version: '2.1.3'
+    // END
     compile "commons-io:commons-io:2.6"
     compile 'org.grails.plugins:cache-headers:2.0.2'
     compile 'org.grails.plugins:spring-security-core:3.2.3'
