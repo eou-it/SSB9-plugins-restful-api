@@ -22,17 +22,18 @@ import grails.core.GrailsApplication
 import grails.util.Holders
 import grails.web.http.HttpHeaders
 import groovy.util.logging.Slf4j
-import net.hedtech.restfulapi.Utility.RestfulGeneralUtility
 import net.hedtech.restfulapi.config.RepresentationConfig
 import net.hedtech.restfulapi.config.ResourceConfig
 import net.hedtech.restfulapi.config.RestConfig
 import net.hedtech.restfulapi.exceptionhandlers.*
 import net.hedtech.restfulapi.extractors.Extractor
 import net.hedtech.restfulapi.extractors.configuration.ExtractorConfigurationHolder
+import net.hedtech.restfulapi.extractors.json.DefaultJSONExtractor
 import net.hedtech.restfulapi.marshallers.StreamWrapper
 import org.apache.commons.logging.LogFactory
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.context.ApplicationContext
+
 
 import static java.util.UUID.randomUUID
 
@@ -104,6 +105,8 @@ class RestfulApiController {
     // Content filter configuration (optionally configured within resources.groovy)
     //  - restContentFilter is configured as a spring bean resource in resources.groovy
     ContentFilter restContentFilter
+
+    RestRuntimeResourceDefinitions restRuntimeResourceDefinitions
 
     // Force all marshallers to remove null fields and empty collections (optionally configured within Config.groovy)
     boolean marshallersRemoveNullFields
@@ -329,15 +332,21 @@ class RestfulApiController {
         log.trace "list invoked for ${params.pluralizedResourceName} - request_id=${request.request_id}"
 
         try {
-            checkMethod( Methods.LIST )
-            def responseRepresentation = getResponseRepresentation() // adds representation attribute to request
-            checkMediaTypeMethod( responseRepresentation.mediaType, Methods.LIST )
+            ResourceConfig resourceConfig = getResourceConfig()
+            checkMethod(Methods.LIST, resourceConfig)
+            def responseRepresentation = getResponseRepresentation(resourceConfig) // adds representation attribute to request
+            checkMediaTypeMethod( responseRepresentation.mediaType, Methods.LIST, resourceConfig )
+
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
 
             def requestParams = params  // accessible from within withCacheHeaders
             def logger = log            // ditto
 
             if (request.method == "POST") {
-                def queryCriteria = parseRequestContent( request, 'query-filters', Methods.LIST, params.pluralizedResourceName )
+                def queryCriteria = parseRequestContent( request, 'query-filters', Methods.LIST, params.pluralizedResourceName, resourceConfig )
                 updatePagingQueryParams( queryCriteria ) // We'll ensure params uses expected Grails naming
                 requestParams << queryCriteria
             }
@@ -345,11 +354,11 @@ class RestfulApiController {
                 updatePagingQueryParams( requestParams ) // We'll ensure params uses expected Grails naming
             }
 
-            def service = getRepresentationService(responseRepresentation)
+            def service = getRepresentationService(responseRepresentation, resourceConfig)
             if(!service) {
-                service = getService()
+                service = getService(resourceConfig)
             }
-            def delegateToService = getServiceAdapter()
+            def delegateToService = getServiceAdapter(resourceConfig)
             logger.trace "... will delegate list() to service $service using adapter $delegateToService"
 
             def result = delegateToService.list(service, requestParams)
@@ -380,27 +389,29 @@ class RestfulApiController {
                 delegate.lastModified {
                     lastModifiedFor( result )
                 }
-                ResponseHolder holder = new ResponseHolder()
-                holder.data = result
-                if (hasTotalCount) {
-                    holder.addHeader(totalCountHeader, count)
-                }
-                holder.addHeader(pageOffsetHeader, requestParams.offset ? requestParams?.offset : 0)
-                holder.addHeader(pageMaxHeader, requestParams.max ? requestParams?.max : result.size())
-                if (request.method == "POST") {
-                    holder.isQapi = true
-                }
+                    ResponseHolder holder = new ResponseHolder()
+                    holder.data = result
+                    if (hasTotalCount) {
+                        holder.addHeader(totalCountHeader, count)
+                    }
+                    holder.addHeader(pageOffsetHeader, requestParams.offset ? requestParams?.offset : 0)
+                    holder.addHeader(pageMaxHeader, requestParams.max ? requestParams?.max : result.size())
+                    if (request.method == "POST") {
+                        holder.isQapi = true
+                    }
                 generate {
-                    renderSuccessResponse( holder, 'default.rest.list.message' )
+                    renderSuccessResponse(holder, 'default.rest.list.message', resourceConfig)
                 }
             }
         }
         catch (e) {
+            log.trace "Error in list method:"+e
             logMessageError(e)
-            renderErrorResponse(e)
+            renderErrorResponse(e, resourceConfig)
             return
         }
         finally{
+            log.trace "Invalidating the session in list method"
             try {
                 if(Holders.config.apiOracleUsersProxied){
                     session.invalidate()
@@ -417,14 +428,21 @@ class RestfulApiController {
         log.trace "show() invoked for ${params.pluralizedResourceName}/${params.id} - request_id=${request.request_id}"
 
         try {
-            checkMethod( Methods.SHOW )
-            def responseRepresentation = getResponseRepresentation()
-            checkMediaTypeMethod( responseRepresentation.mediaType, Methods.SHOW )
+            ResourceConfig resourceConfig = getResourceConfig()
+            checkMethod(Methods.SHOW, resourceConfig)
+            def responseRepresentation = getResponseRepresentation(resourceConfig)
+            checkMediaTypeMethod( responseRepresentation.mediaType, Methods.SHOW, resourceConfig )
 
             def requestParams = params  // accessible from within withCacheHeaders
             def logger = log            // ditto
 
-            def result = getServiceAdapter().show( getService(), requestParams )
+            //check to veify if its a custom-resource
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
+
+            def result = getServiceAdapter(resourceConfig).show( getService(resourceConfig), requestParams )
             // Need to create etagValue outside of 'etag' block:
             // http://jira.grails.org/browse/GPCACHEHEADERS-14
             String etagValue = etagGenerator.shaFor( result, responseRepresentation.mediaType )
@@ -441,15 +459,17 @@ class RestfulApiController {
                 }
                 generate {
                     renderSuccessResponse( new ResponseHolder( data: result ),
-                                           'default.rest.shown.message' )
+                            'default.rest.shown.message', resourceConfig )
                 }
             }
         }
         catch (e) {
+            log.trace "Error in show method:"+e
             logMessageError(e)
-            renderErrorResponse(e)
+            renderErrorResponse(e, resourceConfig)
         }
         finally{
+            log.trace "Invalidating the session in show method"
             try {
                 if(Holders.config.apiOracleUsersProxied){
                 session.invalidate()
@@ -466,20 +486,27 @@ class RestfulApiController {
         def result
 
         try {
-            checkMethod( Methods.CREATE )
-            def content = parseRequestContent( request, params.pluralizedResourceName, Methods.CREATE )
+            ResourceConfig resourceConfig = getResourceConfig()
+            checkMethod(Methods.CREATE, resourceConfig)
+            def content = parseRequestContent( request, params.pluralizedResourceName, Methods.CREATE, resourceConfig )
             log.trace "Extracted content $content"
-            getResponseRepresentation()
-            result = getServiceAdapter().create( getService(), content, params )
+            def responseRepresentation = getResponseRepresentation(resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
+            result = getServiceAdapter(resourceConfig).create( getService(resourceConfig), content, params )
             response.setStatus( 201 )
             renderSuccessResponse( new ResponseHolder( data: result ),
-                                   'default.rest.created.message' )
+                    'default.rest.created.message', resourceConfig )
         }
         catch (e) {
+            log.trace "Error in create method:"+e
             logMessageError(e)
-            renderErrorResponse(e)
+            renderErrorResponse(e, resourceConfig)
         }
         finally{
+            log.trace "Invalidating the session in create method"
             try {
                 if(Holders.config.apiOracleUsersProxied){
                     session.invalidate()
@@ -496,20 +523,27 @@ class RestfulApiController {
         def result
 
         try {
-            checkMethod( Methods.UPDATE )
-            def content = parseRequestContent( request, params.pluralizedResourceName, Methods.UPDATE )
-            checkId(content)
-            getResponseRepresentation()
-            result = getServiceAdapter().update( getService(), content, params )
+            ResourceConfig resourceConfig = getResourceConfig()
+            checkMethod(Methods.UPDATE, resourceConfig)
+            def content = parseRequestContent( request, params.pluralizedResourceName, Methods.UPDATE, resourceConfig )
+            checkId(content, resourceConfig)
+            def responseRepresentation = getResponseRepresentation(resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+                params?.majorVersion = resourceConfig?.representations[responseRepresentation?.mediaType]?.apiVersion?.majorVersion
+            }
+            result = getServiceAdapter(resourceConfig).update( getService(resourceConfig), content, params )
             response.setStatus( 200 )
             renderSuccessResponse( new ResponseHolder( data: result ),
-                                   'default.rest.updated.message' )
+                    'default.rest.updated.message', resourceConfig )
         }
         catch (e) {
+            log.trace "Error in update method:"+e
             logMessageError(e)
-            renderErrorResponse(e)
+            renderErrorResponse(e, resourceConfig)
         }
         finally{
+            log.debug "Invalidating session in update method"
             try {
                 if(Holders.config.apiOracleUsersProxied){
                     session.invalidate()
@@ -525,27 +559,32 @@ class RestfulApiController {
         log.trace "delete() invoked for ${params.pluralizedResourceName}/${params.id} - request_id=${request.request_id}"
 
         try {
-            checkMethod( Methods.DELETE )
+            ResourceConfig resourceConfig = getResourceConfig()
+            checkMethod(Methods.DELETE, resourceConfig)
             def content = [:]
-            ResourceConfig config = getResourceConfig()
-            if (config.bodyExtractedOnDelete) {
-                content = parseRequestContent( request, params.pluralizedResourceName, Methods.DELETE )
+            if (resourceConfig.bodyExtractedOnDelete) {
+                content = parseRequestContent( request, params.pluralizedResourceName, Methods.DELETE, resourceConfig )
             } else {
                 def types = mediaTypeParser.parse( request.getHeader(HttpHeaders.CONTENT_TYPE) )
                 types.each { type ->
-                    checkMediaTypeMethod( type.name, Methods.DELETE )
+                    checkMediaTypeMethod( type.name, Methods.DELETE, resourceConfig )
                 }
             }
-            checkId(content)
-            getServiceAdapter().delete( getService(), content, params )
+            checkId(content, resourceConfig)
+            if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+                params?.serviceName = "specDrivenAPIDataModelFacadeService"
+            }
+            getServiceAdapter(resourceConfig).delete( getService(resourceConfig), content, params )
             response.setStatus( 200 )
-            renderSuccessResponse( new ResponseHolder(), 'default.rest.deleted.message' )
+            renderSuccessResponse(new ResponseHolder(), 'default.rest.deleted.message', resourceConfig)
         }
         catch (e) {
+            log.debug "Error in delete method:"+e
             logMessageError(e)
-            renderErrorResponse(e)
+            renderErrorResponse(e, resourceConfig)
         }
         finally{
+            log.debug "Invalidating session in delete method"
             try {
                 if(Holders.config.apiOracleUsersProxied){
                     session.invalidate()
@@ -566,11 +605,11 @@ class RestfulApiController {
      * @param responseMap the Map to render
      * @param msgResourceCode the resource code used to create a message entry
      **/
-     protected void renderSuccessResponse(ResponseHolder holder, String msgResourceCode) {
+    protected void renderSuccessResponse(ResponseHolder holder, String msgResourceCode, ResourceConfig resourceConfig) {
         String localizedName = localize(Inflector.singularize(params.pluralizedResourceName))
         holder.message = message( code: msgResourceCode, args: [ localizedName ] )
         if (request.request_id) holder.addHeader(requestIdHeader, request.request_id)
-        renderResponse( holder )
+        renderResponse(holder, resourceConfig)
     }
 
 
@@ -578,7 +617,7 @@ class RestfulApiController {
      * Renders an error response appropriate for the exception.
      * @param e the exception to render an error response for
      **/
-    protected void renderErrorResponse( Throwable e ) {
+    protected void renderErrorResponse( Throwable e, ResourceConfig resourceConfig ) {
         ResponseHolder responseHolder = createErrorResponse(e)
         if (request.request_id) responseHolder.addHeader(requestIdHeader, request.request_id)
         //The versioning applies to resource representations, not to
@@ -599,7 +638,7 @@ class RestfulApiController {
                         content = responseHolder.data as XML
                     }
                 }
-            break
+                break
             default:
                 contentType = 'application/json'
                 if (responseHolder.data != null) {
@@ -607,7 +646,7 @@ class RestfulApiController {
                         content = responseHolder.data as JSON
                     }
                 }
-            break
+                break
         }
 
         if (responseHolder.message) {
@@ -631,11 +670,9 @@ class RestfulApiController {
         ResponseHolder responseHolder = new ResponseHolder()
         try {
             def handler = handlerConfig.getHandler(e)
-            def pluralizedResourceNameFromParam = RestfulGeneralUtility.xssSanitize(params.pluralizedResourceName)
-
             ExceptionHandlerContext context = new ExceptionHandlerContext(
-                        pluralizedResourceName: pluralizedResourceNameFromParam,
-                        localizer:localizer)
+                    pluralizedResourceName:params.pluralizedResourceName,
+                    localizer:localizer)
 
             ErrorResponse result = handler.handle(e, context)
             if (result.headers) {
@@ -685,7 +722,7 @@ class RestfulApiController {
     }
 
 
-    protected def generateResponseContent( RepresentationConfig representation, def data ) {
+    protected def generateResponseContent( RepresentationConfig representation, def data, ResourceConfig resourceConfig ) {
         def result
         def framework = representation.resolveMarshallerFramework()
 
@@ -700,7 +737,7 @@ class RestfulApiController {
         switch(framework) {
             case ~/json/:
                 log.trace "Going to useJSON with representation $representation"
-                useJSON(representation) {
+                useJSON(resourceConfig, representation) {
                     result = (data as JSON) as String
 
                     // add a prefix if configured to protect from a JSON Array
@@ -714,7 +751,7 @@ class RestfulApiController {
                 break
             case ~/xml/:
                 log.trace "Going to useXML with representation $representation"
-                useXML(representation) {
+                useXML(resourceConfig, representation) {
                     result = (data as XML) as String
                 }
                 break
@@ -725,7 +762,7 @@ class RestfulApiController {
                 break
         }
         result
-     }
+    }
 
 
     /**
@@ -736,15 +773,15 @@ class RestfulApiController {
      * @param mediaType if specified, use as the media type for the response.
      *        Otherwise, use the media-type type specified by the Accept header.
      **/
-    protected void renderResponse( ResponseHolder responseHolder ) {
+    protected void renderResponse( ResponseHolder responseHolder, ResourceConfig resourceConfig ) {
         //def acceptedTypes = mediaTypeParser.parse( request.getHeader(HttpHeaders.ACCEPT) )
         def representation
         def content
         def contentType
 
         if (responseHolder.data != null) {
-            representation = getResponseRepresentation()
-            content = generateResponseContent( representation, responseHolder.data )
+            representation = getResponseRepresentation(resourceConfig)
+            content = generateResponseContent( representation, responseHolder.data, resourceConfig )
             contentType = selectContentTypeForResponse( representation )
         }
 
@@ -769,9 +806,7 @@ class RestfulApiController {
 
         responseHolder.headers.each { header ->
             header.value.each() { val ->
-                if (header.key) {
-                    response.addHeader( header.key, val )
-                }
+                response.addHeader( header.key, val )
             }
         }
 
@@ -833,8 +868,8 @@ class RestfulApiController {
 
     protected boolean isFilterableContent( def content, def contentType ) {
         return (content && content instanceof String &&
-                    (contentType == "application/json" ||
-                     contentType == "application/xml"))
+                (contentType == "application/json" ||
+                        contentType == "application/xml"))
     }
 
 
@@ -866,19 +901,22 @@ class RestfulApiController {
      * Returns a map representing the properties of content.
      * @param request the request containing the content
      **/
-    protected Map parseRequestContent( request, String resource, String method, String actualResource = null ) {
+    protected Map parseRequestContent( request, String resource, String method, String actualResource = null, ResourceConfig resourceConfig ) {
 
         def isUsingQueryFilters = (resource == 'query-filters')
         if (isUsingQueryFilters && actualResource && useHighestSemanticVersion) {
             resource = actualResource
         }
+        def representation = getRequestRepresentation( resource, resourceConfig )
 
-        ResourceConfig resourceConfig = getResourceConfig( resource )
-        def representation = getRequestRepresentation( resource )
+        checkMediaTypeMethod( representation.mediaType, method, resourceConfig )
+        Extractor extractor = null
+        if(resourceConfig?.serviceName == "specDrivenAPIDataModelFacadeService"){
+            extractor = new DefaultJSONExtractor()
+        }else{
+            extractor  = ExtractorConfigurationHolder.getExtractor( resourceConfig.name, representation.mediaType )
+        }
 
-        checkMediaTypeMethod( representation.mediaType, method )
-
-        Extractor extractor = ExtractorConfigurationHolder.getExtractor( resourceConfig.name, representation.mediaType )
         if (!extractor) {
             unsupportedRequestRepresentation()
         }
@@ -891,9 +929,9 @@ class RestfulApiController {
         //  - create requests if configured to bypass
         //  - update requests if configured to bypass
         if (restContentFilter && !(isUsingQueryFilters ||
-                                   method == Methods.DELETE ||
-                                   (method == Methods.CREATE && restContentFilter.bypassCreateRequest) ||
-                                   (method == Methods.UPDATE && restContentFilter.bypassUpdateRequest))) {
+                method == Methods.DELETE ||
+                (method == Methods.CREATE && restContentFilter.bypassCreateRequest) ||
+                (method == Methods.UPDATE && restContentFilter.bypassUpdateRequest))) {
             def contentType = selectContentTypeForResponse( representation )
             log.trace("Filtering content for resource=$resource with contentType=$contentType")
             try {
@@ -920,8 +958,8 @@ class RestfulApiController {
      * For example: If a URL of /api/pluralizedResourceName/id was invoked,
      * a service name of 'SingularizedResourceNameService' will be returned.
      **/
-    protected String getServiceName() {
-        def svcName = getResourceConfig()?.serviceName
+    protected String getServiceName(ResourceConfig resourceConfig) {
+        def svcName = resourceConfig?.serviceName
         if (svcName == null) {
             svcName = "${domainName()}Service"
         }
@@ -938,14 +976,19 @@ class RestfulApiController {
      * For example: If a URL of /api/pluralizedResourceName/id was invoked,
      * a service named 'SingularizedResourceNameService' will be retrieved
      * from the IoC container.
-     * @see #getServiceName()
+     *
      **/
-    protected def getService() {
-        def svc = getSpringBean( getServiceName() )
+    protected def getService(ResourceConfig resourceConfig) {
+        def svc = getSpringBean(getServiceName(resourceConfig))
         log.trace "getService() will return service $svc"
         if (null == svc) {
-            log.warn "No service found for resource ${params.pluralizedResourceName}"
-            throw new UnsupportedResourceException(params.pluralizedResourceName)
+            if (resourceConfig != null) {
+                svc = getSpringBean(resourceConfig.getServiceName());
+            }
+            if (null == svc) {
+                log.warn "No service found for resource ${params.pluralizedResourceName}"
+                throw new UnsupportedResourceException(params.pluralizedResourceName)
+            }
         }
         log.trace "getService() will return service $svc"
         svc
@@ -964,8 +1007,8 @@ class RestfulApiController {
      * This implementation assumes the adapter is a spring bean
      * implementing the RestfulServiceAdapter interface.
      **/
-    protected String getServiceAdapterName() {
-        def name = getResourceConfig()?.serviceAdapterName
+    protected String getServiceAdapterName(ResourceConfig resourceConfig) {
+        def name = resourceConfig?.serviceAdapterName
         log.trace "getServiceAdapterName() will return $name"
         name
     }
@@ -982,11 +1025,11 @@ class RestfulApiController {
      * If no adapter is found in the Spring container, this
      * implementation will return a built-in pass-through adapter.
      **/
-    protected RestfulServiceAdapter getServiceAdapter() {
+    protected RestfulServiceAdapter getServiceAdapter(ResourceConfig resourceConfig) {
         def adapter
-        def adapterName = getServiceAdapterName()
+        def adapterName = getServiceAdapterName(resourceConfig)
         if (null != adapterName) {
-            adapter = getSpringBean( getServiceAdapterName() )
+            adapter = getSpringBean( getServiceAdapterName(resourceConfig) )
             if (null == adapter) {
                 //if we can't find the per-resource adapter that was configured,
                 //do not continue.  The resource is not configured correctly and
@@ -1008,11 +1051,11 @@ class RestfulApiController {
     }
 
 
-    protected def getRepresentationService(def responseRepresentation) {
+    protected def getRepresentationService(def responseRepresentation, ResourceConfig resourceConfig) {
         //getRepresentation
         def serviceName = responseRepresentation?.representationServiceName
         if(!serviceName) {
-            serviceName = getResourceConfig()?.representations?.get(responseRepresentation?.mediaType)?.representationServiceName
+            serviceName = resourceConfig?.representations?.get(responseRepresentation?.mediaType)?.representationServiceName
         }
         log.trace "getRepresentationService() will return $serviceName"
         def svc = getSpringBean( serviceName )
@@ -1053,35 +1096,39 @@ class RestfulApiController {
     /**
      * Returns the best match or null if no supported representation for the resource exists.
      **/
-    protected RepresentationConfig getRepresentation(pluralizedResourceName, allowedTypes) {
-        return restConfig.getRepresentation( pluralizedResourceName, allowedTypes.name )
+    protected RepresentationConfig getRepresentation(pluralizedResourceName, allowedTypes, ResourceConfig resourceConfig) {
+        RepresentationConfig representationConfig = restConfig.getRepresentation(pluralizedResourceName, allowedTypes.name);
+        if (representationConfig == null) {
+            if (resourceConfig != null) {
+                representationConfig = resourceConfig.getRepresentation(allowedTypes.name);
+            }
+        }
+        return representationConfig
     }
 
 
-    protected void checkMethod( String method ) {
-        def resource = getResourceConfig()
-        if (!resource) {
+    protected void checkMethod(String method, ResourceConfig resourceConfig) {
+        if (!resourceConfig) {
             throw new UnsupportedResourceException( params.pluralizedResourceName )
         }
-        if (!resource.allowsMethod( method ) ) {
-            def allowed = resource.getMethods().intersect( Methods.getMethodGroup( method ) )
+        if (!resourceConfig.allowsMethod( method ) ) {
+            def allowed = resourceConfig.getMethods().intersect( Methods.getMethodGroup( method ) )
             throw new UnsupportedMethodException( supportedMethods:allowed )
         }
     }
 
-    protected void checkMediaTypeMethod( String mediaType, String method ) {
-        def resource = getResourceConfig()
-        if (!resource) {
+    protected void checkMediaTypeMethod( String mediaType, String method, ResourceConfig resourceConfig ) {
+        if (!resourceConfig) {
             throw new UnsupportedResourceException( params.pluralizedResourceName )
         }
-        if (!resource.allowsMediaTypeMethod( mediaType, method ) ) {
-            def allowed = resource.getMethods().intersect( Methods.getMethodGroup( method ) ) - resource.getUnsupportedMediaTypeMethods().get(mediaType)
+        if (!resourceConfig.allowsMediaTypeMethod( mediaType, method ) ) {
+            def allowed = resourceConfig.getMethods().intersect( Methods.getMethodGroup( method ) ) - resourceConfig.getUnsupportedMediaTypeMethods().get(mediaType)
             throw new UnsupportedMethodException( supportedMethods:allowed )
         }
     }
 
-    protected checkId(Map content) {
-        if (content && content.containsKey('id') && getResourceConfig().idMatchEnforced) {
+    protected checkId(Map content, ResourceConfig resourceConfig) {
+        if (content && content.containsKey('id') && resourceConfig.idMatchEnforced) {
             String contentId = content.id == null ? null : content.id.toString()
             if (contentId != params.id) {
                 throw new IdMismatchException( params.pluralizedResourceName )
@@ -1194,19 +1241,40 @@ class RestfulApiController {
      * support it, we can return an appropriate error response.
      **/
     private Object useJSON( String config, Closure closure ) {
+        boolean notFound =false;
         try {
             JSON.getNamedConfig( config )
         } catch (ConverterException e) {
-            //failure to retrieve the named config.  Treat as an unknown format.
-            throw new UnsupportedResponseRepresentationException( params.pluralizedResourceName, request.getHeader(HttpHeaders.ACCEPT) )
+            //Create one a converter on the fly....
+            notFound = true;
+        }
+        if (notFound){
+            if (restRuntimeResourceDefinitions != null){
+                boolean customNotFound=false;
+                String customConfig = restRuntimeResourceDefinitions.getGenericConfigName( request.getHeader(HttpHeaders.ACCEPT))
+                try {
+                    JSON.getNamedConfig( customConfig )
+                } catch (ConverterException e) {
+                    //Create one a converter on the fly....
+                    customNotFound = true;
+                }
+                if (customNotFound) {
+                    //Get the custom name and try to use it.
+                    throw new UnsupportedResponseRepresentationException(params.pluralizedResourceName, request.getHeader(HttpHeaders.ACCEPT))
+                }else{
+                    config = customConfig
+                }
+            }else{
+                //failure to retrieve the named config.  Treat as an unknown format.
+                throw new UnsupportedResponseRepresentationException( params.pluralizedResourceName, request.getHeader(HttpHeaders.ACCEPT) )
+            }
         }
         JSON.use(config,closure)
     }
 
 
-    private Object useJSON(RepresentationConfig config, Closure closure) {
-        ResourceConfig resource = getResourceConfig()
-        useJSON( "restfulapi:" + resource.name + ":" + config.mediaType, closure )
+    private Object useJSON(ResourceConfig resourceConfig, RepresentationConfig config, Closure closure) {
+        useJSON( "restfulapi:" + resourceConfig.name + ":" + config.mediaType, closure )
     }
 
 
@@ -1227,17 +1295,16 @@ class RestfulApiController {
     }
 
 
-    private Object useXML( RepresentationConfig config, Closure closure ) {
-        ResourceConfig resource = getResourceConfig()
-        useXML( "restfulapi:" + resource.name + ":" + config.mediaType, closure )
+    private Object useXML(ResourceConfig resourceConfig,  RepresentationConfig config, Closure closure) {
+        useXML( "restfulapi:" + resourceConfig.name + ":" + config.mediaType, closure )
     }
 
 
-    private RepresentationConfig getResponseRepresentation() {
+    private RepresentationConfig getResponseRepresentation(ResourceConfig resourceConfig) {
         def representation = request.getAttribute( RepresentationRequestAttributes.RESPONSE_REPRESENTATION )
         if (representation == null) {
             def acceptedTypes = mediaTypeParser.parse( request.getHeader(HttpHeaders.ACCEPT) )
-            representation = getRepresentation( params.pluralizedResourceName, acceptedTypes )
+            representation = getRepresentation(params.pluralizedResourceName, acceptedTypes, resourceConfig)
             if (representation == null || representation.resolveMarshallerFramework() == null) {
                 //if no representation, or the representation does not have a marshaller framework,
                 //then this is a representation that cannot be marshalled to.
@@ -1249,12 +1316,12 @@ class RestfulApiController {
     }
 
 
-    private RepresentationConfig getRequestRepresentation( String resource = params.pluralizedResourceName ) {
+    private RepresentationConfig getRequestRepresentation( String resource = params.pluralizedResourceName, ResourceConfig resourceConfig ) {
         def representation = request.getAttribute( RepresentationRequestAttributes.REQUEST_REPRESENTATION )
         if (representation == null) {
             def types = mediaTypeParser.parse(request.getHeader(HttpHeaders.CONTENT_TYPE))
             def type = types.size() > 0 ? [types[0]] : []
-            representation = getRepresentation(resource, type)
+            representation = getRepresentation(resource, type, resourceConfig)
             if (representation == null) {
                 unsupportedRequestRepresentation()
             }
@@ -1274,8 +1341,14 @@ class RestfulApiController {
     }
 
 
-    private ResourceConfig getResourceConfig( String resource = params.pluralizedResourceName ) {
-        restConfig.getResource( resource )
+    private ResourceConfig getResourceConfig(String resource = params.pluralizedResourceName) {
+        ResourceConfig resourceConfig = restConfig.getResource( resource ) ;
+        if (resourceConfig == null){
+            if (restRuntimeResourceDefinitions) {
+                resourceConfig = restRuntimeResourceDefinitions.getResourceConfig(resource);
+            }
+        }
+        return resourceConfig
     }
 
     private initExceptionHandlers() {
@@ -1290,5 +1363,4 @@ class RestfulApiController {
 
         handlerConfig.add(new DefaultExceptionHandler(), Integer.MIN_VALUE)
     }
-
 }

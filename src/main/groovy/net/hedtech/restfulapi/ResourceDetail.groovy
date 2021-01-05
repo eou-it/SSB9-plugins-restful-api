@@ -27,5 +27,6 @@ class ResourceDetail {
     Map unsupportedMediaTypeMethods = [:]
     Map resourceMetadata = [:]
     Map representationMetadata = [:]
+    Boolean customResource = false
 
 }
